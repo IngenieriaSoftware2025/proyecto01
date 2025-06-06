@@ -51,7 +51,7 @@ class Router
         }
     }
 
-    public function render($view, $datos = [])
+    public function render($view, $datos = [], $layout = 'layouts/layout')
     {
 
         // Leer lo que le pasamos  a la vista
@@ -64,7 +64,7 @@ class Router
         // entonces incluimos la vista en el layout
         include_once __DIR__ . "/views/$view.php";
         $contenido = ob_get_clean(); // Limpia el Buffer
-        include_once __DIR__ . '/views/layout.php';
+        include_once __DIR__ . "/views/$layout.php";
     }
 
     public function load($view, $datos = []){
