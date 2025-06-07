@@ -40,7 +40,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/proyecto01/aplicaciones"><i class="bi bi-app me-2"></i>Aplicaciones</a>
+                        <a class="nav-link" aria-current="page" href="/proyecto01/permisos"><i class="bi bi-person-fill-gear me-2"></i>permisos</a>
                     </li>
   
                     <div class="nav-item dropdown " >
