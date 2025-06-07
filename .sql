@@ -1,4 +1,4 @@
-create database login
+create database proyecto01
 
 CREATE TABLE usuario(
 usuario_id SERIAL PRIMARY KEY,

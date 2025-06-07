@@ -1,58 +1,86 @@
-<section class="h-100 gradient-form" style="background-color: #eee;">
+<section class="vh-100 gradient-custom">
   <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="col-xl-10">
-        <div class="card rounded-3 text-black">
-          <div class="row g-0">
-            <div class="col-lg-6">
-              <div class="card-body p-md-5 mx-md-4">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card bg-dark text-white" style="border-radius: 1rem;">
+          <div class="card-body p-5 text-center">
 
-                <div class="text-center">
-                  <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/lotus.webp"
-                    style="width: 185px;" alt="logo">
-                  <h4 class="mt-1 mb-5 pb-1">We are The Lotus Team</h4>
+            <div class="mb-md-5 mt-md-4 pb-5">
+
+              <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
+              <p class="text-white-50 mb-5">Por favor ingresa tu correo y contraseña</p>
+
+              <form id="formLogin" name="formLogin">
+                
+                <div data-mdb-input-init class="form-outline form-white mb-4">
+                  <input type="email" id="usuario_correo" name="usuario_correo" class="form-control form-control-lg" required />
+                  <label class="form-label" for="usuario_correo">Correo Electronico</label>
                 </div>
 
-                <form>
-                  <p>Please login to your account</p>
+                <div data-mdb-input-init class="form-outline form-white mb-4">
+                  <input type="password" id="usuario_contra" name="usuario_contra" class="form-control form-control-lg" required />
+                  <label class="form-label" for="usuario_contra">Contraseña</label>
+                </div>
 
-                  <div data-mdb-input-init class="form-outline mb-4">
-                    <input type="email" id="form2Example11" class="form-control"
-                      placeholder="Phone number or email address" />
-                    <label class="form-label" for="form2Example11">Username</label>
-                  </div>
+                <p class="small mb-5 pb-lg-2">
+                  <a class="text-white-50" href="#!">Olvidaste tu contraseña?</a>
+                </p>
 
-                  <div data-mdb-input-init class="form-outline mb-4">
-                    <input type="password" id="form2Example22" class="form-control" />
-                    <label class="form-label" for="form2Example22">Password</label>
-                  </div>
+                <button id="btnLogin" class="btn btn-outline-light btn-lg px-5" type="submit">
+                  <span id="btnText">Iniciar Sesión</span>
+                  <span id="btnSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                </button>
 
-                  <div class="text-center pt-1 mb-5 pb-1">
-                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3" type="button">Log
-                      in</button>
-                    <a class="text-muted" href="#!">Forgot password?</a>
-                  </div>
+              </form>
 
-                  <div class="d-flex align-items-center justify-content-center pb-4">
-                    <p class="mb-0 me-2">Don't have an account?</p>
-                    <button  type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-outline-danger">Create new</button>
-                  </div>
-
-                </form>
-
+              <div class="d-flex justify-content-center text-center mt-4 pt-1">
+                <p class="text-white-50 mb-0">
+                  ¿No tienes cuenta? 
+                  <a href="/proyecto01/registro" class="text-white">Regístrate aquí</a>
+                </p>
               </div>
+
             </div>
-            <div class="col-lg-6 d-flex align-items-center gradient-custom-2">
-              <div class="text-white px-3 py-4 p-md-5 mx-md-4">
-                <h4 class="mb-4">We are more than just a company</h4>
-                <p class="small mb-0">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                  tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                  exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+.gradient-custom {
+  background: linear-gradient(to right, rgba(106, 17, 203, 1), rgba(37, 117, 252, 1));
+}
+
+.form-white .form-control {
+  border: 1px solid #fff;
+}
+
+.form-white .form-control:focus {
+  border-color: #fff;
+  box-shadow: inset 0 0 0 1px #fff;
+}
+
+.form-white .form-control::placeholder {
+  color: #fff;
+}
+
+.form-white label {
+  color: #fff;
+}
+
+.btn-outline-light:hover {
+  background-color: #fff;
+  color: #000;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+.loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+</style>
+
+<script src="<?= asset('./build/js/login/index.js') ?>"></script>

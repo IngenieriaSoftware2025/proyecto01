@@ -1,12 +1,11 @@
 <?php
-// crea nombre de espacio Model
+
 namespace Model;
-// Importa la clase ActiveRecord del nombre de espacio Model
+
 use Model\ActiveRecord;
-// Crea la clase de instancia Usuario y hereda las funciones de ActiveRecord
+
 class Usuarios extends ActiveRecord {
-    
-    // Crea las propiedades de la clase
+
     public static $tabla = 'usuario';
     public static $idTabla = 'usuario_id';
     public static $columnasDB = 

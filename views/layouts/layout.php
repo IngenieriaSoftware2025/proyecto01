@@ -16,7 +16,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a class="navbar-brand" href="/ejemplo/">
+            <a class="navbar-brand" href="/proyecto01/">
                 <img src="<?= asset('./images/cit.png') ?>" width="35px'" alt="cit" >
                 Aplicaciones
             </a>
@@ -24,7 +24,7 @@
                 
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="margin: 0;">
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/ejemplo/"><i class="bi bi-house-fill me-2"></i>Inicio</a>
+                        <a class="nav-link" aria-current="page" href="/proyecto01/"><i class="bi bi-house-fill me-2"></i>Inicio</a>
                     </li>
 
                     <li class="nav-item">
@@ -32,7 +32,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/proyecto01/usuarios"><i class="bi bi-person-add me-2"></i>Usuarios</a>
+                        <a class="nav-link" aria-current="page" href="/proyecto01/registro"><i class="bi bi-person-add me-2"></i>Usuarios</a>
                     </li>
   
                     <div class="nav-item dropdown " >

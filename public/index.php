@@ -14,10 +14,14 @@ $router->get('/', [AppController::class,'index']);
 
 //RUTAS LOGIN
 $router->get('/login', [LoginController::class,'renderizarPagina']);
+$router->post('/login/loginAPI', [LoginController::class, 'loginAPI']);
+$router->get('/login/logout', [LoginController::class, 'logout']);
+$router->get('/login/verificarSesion', [LoginController::class, 'verificarSesion']);
 
-//RUTAS PARA USUARIOS
-$router->get('/usuarios', [RegistroController::class,'renderizarPagina']);
-$router->post('/usuarios/guardar', [RegistroController::class,'guardarAPI']);
+//RUTAS PARA registro
+$router->get('/registro', [RegistroController::class,'renderizarPagina']);
+$router->post('/registro/guardar', [RegistroController::class,'guardarAPI']);
+$router->get('/registro/buscarAPI', [RegistroController::class,'buscarAPI']);
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();
