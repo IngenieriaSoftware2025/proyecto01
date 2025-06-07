@@ -2,189 +2,226 @@
 
 namespace Controllers;
 
-use Model\ActiveRecord;
-use Model\Usuario;
-use MVC\Router;
 use Exception;
+use MVC\Router;
+use Model\ActiveRecord;
+use Model\Usuarios;
 
 class RegistroController extends ActiveRecord
 {
 
     public static function renderizarPagina(Router $router)
     {
-        $router->render('registro/index', []);
+        $router->render('usuarios/index', []);
     }
+
 
     public static function guardarAPI()
     {
         getHeadersApi();
-        if (empty($_POST['usuario_nom1'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El primer nombre del usuario es obligatorio'
-            ]);
-            return;
-        }
-        if (empty($_POST['usuario_ape1'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El primer apellido del usuario es obligatorio'
-            ]);
-            return;
-        }
-        if (empty($_POST['usuario_tel']) || strlen($_POST['usuario_tel']) != 8) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El teléfono debe tener 8 dígitos'
-            ]);
-            return;
-        }
-        if (empty($_POST['usuario_direc'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La dirección del usuario es obligatoria'
-            ]);
-            return;
-        }
-        if (empty($_POST['usuario_dpi']) || strlen($_POST['usuario_dpi']) != 13) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El DPI debe tener 13 dígitos'
-            ]);
-            return;
-        }
-        if (empty($_POST['usuario_correo']) || !filter_var($_POST['usuario_correo'], FILTER_VALIDATE_EMAIL)) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El correo electrónico es obligatorio y debe ser válido'
-            ]);
-            return;
-        }
-        if (empty($_POST['usuario_contra'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La contraseña es obligatoria'
-            ]);
-            return;
-        }
-        if (strlen($_POST['usuario_contra']) < 10) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La contraseña debe tener al menos 10 caracteres'
-            ]);
-            return;
-        }
-        if (!preg_match('/[A-Z]/', $_POST['usuario_contra'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La contraseña debe contener al menos una letra mayúscula'
-            ]);
-            return;
-        }
-        if (!preg_match('/[a-z]/', $_POST['usuario_contra'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La contraseña debe contener al menos una letra minúscula'
-            ]);
-            return;
-        }
-        if (!preg_match('/[0-9]/', $_POST['usuario_contra'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La contraseña debe contener al menos un número'
-            ]);
-            return;
-        }
-        if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};:\'"\\|,.<>\/?]/', $_POST['usuario_contra'])) {
-            http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La contraseña debe contener al menos un carácter especial (!@#$%^&*()_+-=[]{};\'"\\|,.<>/?)'
-            ]);
-            return;
-        }
-
-        try {
-            $usuarioExistenteDpi = Usuario::where('usuario_dpi', $_POST['usuario_dpi']);
-            if ($usuarioExistenteDpi) {
-                http_response_code(400);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Ya existe un usuario registrado con este DPI'
-                ]);
-                return;
-            }
-
-            $usuarioExistenteCorreo = Usuario::where('usuario_correo', $_POST['usuario_correo']);
-            if ($usuarioExistenteCorreo) {
-                http_response_code(400);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Ya existe un usuario registrado con este correo electrónico'
-                ]);
-                return;
-            }
-
-            $_POST['usuario_nom1'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_nom1']))));
-            $_POST['usuario_nom2'] = !empty($_POST['usuario_nom2']) ? ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_nom2'])))) : '';
-            $_POST['usuario_ape1'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_ape1']))));
-            $_POST['usuario_ape2'] = !empty($_POST['usuario_ape2']) ? ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_ape2'])))) : '';
-            $_POST['usuario_tel'] = filter_var($_POST['usuario_tel'], FILTER_SANITIZE_NUMBER_INT);
-            $_POST['usuario_direc'] = trim(htmlspecialchars($_POST['usuario_direc']));
-            $_POST['usuario_dpi'] = filter_var($_POST['usuario_dpi'], FILTER_SANITIZE_NUMBER_INT);
-            $_POST['usuario_correo'] = filter_var($_POST['usuario_correo'], FILTER_SANITIZE_EMAIL);
+    
+        
+        //saniticacion de nombre y validaccion con capital
+        $_POST['usuario_nom1'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_nom1']))));
+        
+        $cantidad_nombre = strlen($_POST['usuario_nom1']);
+        
+        if ($cantidad_nombre < 2) {
             
-            $usuario_contra_hash = password_hash($_POST['usuario_contra'], PASSWORD_DEFAULT);
-            $usuario_token = bin2hex(random_bytes(32));
-
-            $usuario = new Usuario([
-                'usuario_nom1' => $_POST['usuario_nom1'],
-                'usuario_nom2' => $_POST['usuario_nom2'],
-                'usuario_ape1' => $_POST['usuario_ape1'],
-                'usuario_ape2' => $_POST['usuario_ape2'],
-                'usuario_tel' => $_POST['usuario_tel'],
-                'usuario_direc' => $_POST['usuario_direc'],
-                'usuario_dpi' => $_POST['usuario_dpi'],
-                'usuario_correo' => $_POST['usuario_correo'],
-                'usuario_contra' => $usuario_contra_hash,
-                'usuario_token' => $usuario_token,
-                'usuario_fotografia' => $_POST['usuario_fotografia'] ?? '',
-                'usuario_situacion' => 1
-            ]);
-
-            $crear = $usuario->crear();
-
-            http_response_code(201);
-            echo json_encode([
-                'codigo' => 1,
-                'mensaje' => 'Usuario guardado exitosamente',
-                'datos' => [
-                    'usuario_id' => $crear,
-                    'usuario_token' => $usuario_token
-                ]
-            ]);
-
-        } catch (Exception $e) {
-            http_response_code(500);
+            http_response_code(400);
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error al guardar el usuario',
-                'detalle' => $e->getMessage()
+                'mensaje' => 'Nombre debe de tener mas de 1 caracteres'
+            ]);
+            exit;
+        }
+        
+        $_POST['usuario_nom2'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_nom2']))));
+        
+        $cantidad_nombre = strlen($_POST['usuario_nom2']);
+        
+        if ($cantidad_nombre < 2) {
+          
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Nombre debe de tener mas de 1 caracteres'
+            ]);
+            exit;
+        }
+        
+        $_POST['usuario_ape1'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_ape1']))));
+        $cantidad_apellido = strlen($_POST['usuario_ape1']);
+        
+        if ($cantidad_apellido < 2) {
+         
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Nombre debe de tener mas de 1 caracteres'
+            ]);
+            exit;
+        }
+        
+        $_POST['usuario_ape2'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_ape2']))));
+        $cantidad_apellido = strlen($_POST['usuario_ape2']);
+        
+        if ($cantidad_apellido < 2) {
+            
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Nombre debe de tener mas de 1 caracteres'
+            ]);
+            exit;
+        }
+        
+        $_POST['usuario_tel'] = filter_var($_POST['usuario_tel'], FILTER_SANITIZE_NUMBER_INT);
+        if (strlen($_POST['usuario_tel']) != 8) {
+        
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'El telefono debe de tener 8 numeros'
+            ]);
+            exit;
+        }
+        
+        $_POST['usuario_direc'] = ucwords(strtolower(trim(htmlspecialchars($_POST['usuario_direc']))));
+        
+        $_POST['usuario_tel'] = filter_var($_POST['usuario_tel'], FILTER_VALIDATE_INT);
+        if (strlen($_POST['usuario_direc']) >= 13) {
+           
+            
+            echo json_encode([
+                'codigo' => 0,
+                'mennsaje' => 'La cantidad de digitos del DPI debe de ser igual a 13'
+            ]);
+            exit;
+        }
+        
+        $_POST['usuario_correo'] = filter_var($_POST['usuario_correo'], FILTER_SANITIZE_EMAIL);
+        
+        if (!filter_var($_POST['usuario_correo'], FILTER_VALIDATE_EMAIL)){
+          
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'El correo electronico no es valido'
             ]);
         }
+        
+        
+        // VALIDACIÓN: Contraseña
+        if (strlen($_POST['usuario_contra']) < 8) {
+      
+            
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'La contraseña debe tener al menos 8 caracteres'
+            ]);
+            exit;
+        }
+        
+        // VALIDACIÓN: Confirmar contraseña
+        if ($_POST['usuario_contra'] !== $_POST['confirmar_contra']) {
+            
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Las contraseñas no coinciden'
+            ]);
+            exit;
+        }
+        
+        $_POST['usuario_token'] = uniqid();
+        $dpi = $_POST['usuario_dpi'];
+        $_POST['usuario_fecha_creacion'] = '';
+        $_POST['usuario_fecha_contra'] = '';
+        
+        $file = $_FILES['usuario_fotografia'];
+        $fileName = $file['name'];
+        $fileTmpName = $file['tmp_name'];
+        $fileSize = $file['size'];
+        $fileError = $file['error'];
+        
+      
+        
+        
+        
+        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+  
+        // Extensiones permitidas
+        $allowed = ['jpg', 'jpeg', 'png'];
+        
+        if (!in_array($fileExtension, $allowed)) {
+            
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 2,
+                'mensaje' => 'Solo puede cargar archivos JPG, PNG o JPEG',
+            ]);
+            exit;
+        }
+        
+        if ($fileSize >= 2000000) {
+            
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 2,
+                'mensaje' => 'La imgagen debe pesar menos de 2MB',
+            ]);
+            exit;
+        }
+        
+        if ($fileError === 0) {
+                $ruta = "storage/fotosUsuarios/$dpi.$fileExtension";
+                $subido = move_uploaded_file($file['tmp_name'], __DIR__ . "../../" . $ruta);
+                
+                if ($subido) {
+                    
+                    $_POST['usuario_contra'] = password_hash($_POST['usuario_contra'], PASSWORD_DEFAULT);
+                    $foto = base64_encode(file_get_contents(__DIR__ . '/../' . $ruta));
+                    $_SESSION['user']->foto = $foto;
+                    $usuario = new Usuarios($_POST);
+                    $usuario->usuario_fotografia = $ruta;
+                    $resultado = $usuario->crear();
+
+                    if($resultado['resultado'] ==1){
+                        
+                        http_response_code(200);
+                        echo json_encode([
+                            'codigo' => 1,
+                            'mensaje' => 'Usuario registrado correctamente',
+                        ]);
+                        
+                        exit;
+                    }else{
+                        
+                http_response_code(500);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error en registrar al usuario',
+                    'datos' => $_POST,
+                    'usuario' => $usuario,
+                ]);
+                exit;
+
+
+                    }
+                } 
+            } else {
+                
+                http_response_code(500);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error en la carga de fotografia',
+                ]);
+                exit;
+            }
+        
+            
+
     }
-
+    
 }
-?>
-

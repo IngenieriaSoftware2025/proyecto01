@@ -18,6 +18,10 @@ class ActiveRecord {
         self::$db = $database;
     }
 
+     public static function getDB(): PDO
+    {
+        return self::$db;
+    }
     public static function setAlerta($tipo, $mensaje) {
         static::$alertas[$tipo][] = $mensaje;
     }
@@ -111,6 +115,7 @@ class ActiveRecord {
         
 
         // debuguear($query);
+        // return $query;
 
         // Resultado de la consulta
         $resultado = self::$db->exec($query);

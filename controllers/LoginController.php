@@ -2,17 +2,16 @@
 
 namespace Controllers;
 
-use Model\ActiveRecord;
-use MVC\Router;
 use Exception;
+use MVC\Router;
+use Model\ActiveRecord;
 
+//C:\docker\app03_jemg\views\clientes\index.php
 class LoginController extends ActiveRecord
 {
 
     public static function renderizarPagina(Router $router)
     {
-        $router->render('login/index', []);
+        $router->render('login/index', [], 'layouts/layoutLogin');
     }
-
-    
 }
