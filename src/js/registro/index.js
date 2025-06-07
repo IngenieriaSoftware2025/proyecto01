@@ -3,7 +3,6 @@ import { validarFormulario, Toast } from "../funciones";
 import { lenguaje } from "../lenguaje";
 import Swal from "sweetalert2";
 
-// Referencias a elementos del DOM
 const formUsuario = document.getElementById('formUsuario');
 const btnGuardar = document.getElementById('BtnGuardar');
 const btnLimpiar = document.getElementById('BtnLimpiar');
@@ -15,25 +14,22 @@ const seccion_usuarios = document.getElementById('seccion_usuarios');
 const contenedor_tabla = document.getElementById('contenedor_tabla');
 const mensaje_sin_datos = document.getElementById('mensaje_sin_datos');
 
-// Variables globales
+
 let tabla_usuarios = null;
 let usuarios_cargados = false;
 
-// Validación personalizada de campos
+// Validación de campos
 const validarCampos = () => {
     const errores = [];
     
-    // Validar primer nombre
     if (!formUsuario.usuario_nom1.value.trim()) {
         errores.push('El primer nombre es obligatorio');
     }
     
-    // Validar primer apellido
     if (!formUsuario.usuario_ape1.value.trim()) {
         errores.push('El primer apellido es obligatorio');
     }
-    
-    // Validar teléfono
+
     const telefono = formUsuario.usuario_tel.value.trim();
     if (!telefono) {
         errores.push('El teléfono es obligatorio');
@@ -41,7 +37,6 @@ const validarCampos = () => {
         errores.push('El teléfono debe tener exactamente 8 dígitos');
     }
     
-    // Validar DPI
     const dpi = formUsuario.usuario_dpi.value.trim();
     if (!dpi) {
         errores.push('El DPI es obligatorio');
@@ -49,12 +44,10 @@ const validarCampos = () => {
         errores.push('El DPI debe tener exactamente 13 dígitos');
     }
     
-    // Validar dirección
     if (!formUsuario.usuario_direc.value.trim()) {
         errores.push('La dirección es obligatoria');
     }
-    
-    // Validar correo electrónico
+  
     const correo = formUsuario.usuario_correo.value.trim();
     if (!correo) {
         errores.push('El correo electrónico es obligatorio');
@@ -62,14 +55,12 @@ const validarCampos = () => {
         errores.push('El formato del correo electrónico no es válido');
     }
     
-    // Validar contraseña
     const password = formUsuario.usuario_contra.value;
     if (!password) {
         errores.push('La contraseña es obligatoria');
     } else if (password.length < 10) {
         errores.push('La contraseña debe tener al menos 10 caracteres');
     } else {
-        // Validar complejidad de contraseña
         if (!/[A-Z]/.test(password)) {
             errores.push('La contraseña debe contener al menos una letra mayúscula');
         }
@@ -83,8 +74,8 @@ const validarCampos = () => {
             errores.push('La contraseña debe contener al menos un carácter especial');
         }
     }
-    
-    // Validar confirmación de contraseña
+
+    //confirmación de contraseña
     const confirmar = formUsuario.confirmar_contra.value;
     if (!confirmar) {
         errores.push('Debe confirmar la contraseña');
@@ -95,7 +86,6 @@ const validarCampos = () => {
     return errores;
 };
 
-// Función para mostrar errores
 const mostrarErrores = (errores) => {
     const listaErrores = errores.map(error => `• ${error}`).join('<br>');
     
@@ -108,7 +98,6 @@ const mostrarErrores = (errores) => {
     });
 };
 
-// Función para limpiar estilos de validación
 const limpiarValidacion = () => {
     const inputs = formUsuario.querySelectorAll('.form-control');
     inputs.forEach(input => {
@@ -116,7 +105,6 @@ const limpiarValidacion = () => {
     });
 };
 
-// Vista previa de imagen
 const mostrarVistaPrevia = (event) => {
     const archivo = event.target.files[0];
     
@@ -161,20 +149,16 @@ const mostrarVistaPrevia = (event) => {
     }
 };
 
-// Función principal de guardar usuario
 const guardarUsuario = async (e) => {
     e.preventDefault();
     
     limpiarValidacion();
     
-    // Validar campos
     const errores = validarCampos();
     if (errores.length > 0) {
         mostrarErrores(errores);
         return;
     }
-    
-    // Deshabilitar botón y mostrar estado de carga
     btnGuardar.disabled = true;
     btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
     
@@ -193,7 +177,6 @@ const guardarUsuario = async (e) => {
         console.log('Respuesta del servidor:', data);
         
         if (codigo === 1) {
-            // Éxito
             Toast.fire({
                 icon: 'success',
                 title: mensaje
@@ -203,13 +186,11 @@ const guardarUsuario = async (e) => {
             preview_foto.classList.add('d-none');
             limpiarValidacion();
             
-            // Si hay tabla cargada, recargar datos
             if (usuarios_cargados) {
                 buscarUsuarios();
             }
             
         } else {
-            // Error
             Toast.fire({
                 icon: 'error',
                 title: mensaje
@@ -227,13 +208,11 @@ const guardarUsuario = async (e) => {
             title: 'Error de conexión con el servidor'
         });
     } finally {
-        // Restaurar botón
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = '<i class="bi bi-floppy me-2"></i>Registrar Usuario';
     }
 };
 
-// Función para buscar usuarios
 const buscarUsuarios = async () => {
     try {
         btnBuscarUsuarios.disabled = true;
@@ -264,7 +243,6 @@ const buscarUsuarios = async () => {
     }
 };
 
-// Función para mostrar tabla de usuarios con fotografías 
 const mostrarTablaUsuarios = (usuarios) => {
     seccion_usuarios.classList.remove('d-none');
     seccion_usuarios.classList.add('fade-in');
@@ -361,16 +339,14 @@ const mostrarTablaUsuarios = (usuarios) => {
         ]
     });
     
-    // Event listeners para fotos y botones
+  
     setTimeout(() => {
-        // Fotos
         document.querySelectorAll('.foto-usuario').forEach(foto => {
             foto.addEventListener('click', function() {
                 mostrarImagenCompleta(this.getAttribute('data-imagen'), this.getAttribute('data-nombre'));
             });
         });
         
-        // Botones modificar y eliminar
         document.querySelectorAll('.modificar').forEach(btn => {
             btn.addEventListener('click', llenarFormulario);
         });
@@ -381,7 +357,6 @@ const mostrarTablaUsuarios = (usuarios) => {
     }, 100);
 };
 
-// Función para mostrar imagen completa en modal
 const mostrarImagenCompleta = (rutaImagen, nombreUsuario) => {
     Swal.fire({
         title: `Fotografía de ${nombreUsuario}`,
@@ -395,7 +370,6 @@ const mostrarImagenCompleta = (rutaImagen, nombreUsuario) => {
             image: 'img-fluid rounded'
         },
         didOpen: () => {
-            // Agregar evento para cerrar con click en la imagen
             const imagen = Swal.getImage();
             if (imagen) {
                 imagen.style.cursor = 'pointer';
@@ -407,7 +381,6 @@ const mostrarImagenCompleta = (rutaImagen, nombreUsuario) => {
     });
 };
 
-// Función para llenar formulario para modificar
 const llenarFormulario = (e) => {
     const datos = e.currentTarget.dataset;
     
@@ -427,7 +400,6 @@ const llenarFormulario = (e) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// Función para modificar usuario
 const modificarUsuario = async (e) => {
     e.preventDefault();
     
@@ -458,7 +430,6 @@ const modificarUsuario = async (e) => {
     }
 };
 
-// Función para eliminar usuario
 const eliminarUsuario = async (e) => {
     const id = e.currentTarget.dataset.id;
     
@@ -490,7 +461,6 @@ const eliminarUsuario = async (e) => {
     }
 };
 
-// Función para limpiar formulario
 const limpiarFormulario = () => {
     formUsuario.reset();
     preview_foto.classList.add('d-none');
@@ -499,9 +469,8 @@ const limpiarFormulario = () => {
     btnModificar.classList.add('d-none');
 };
 
-// Validación en tiempo real para campos específicos
+// Validación en tiempo real 
 formUsuario.usuario_tel.addEventListener('input', (e) => {
-    // Solo permitir números
     e.target.value = e.target.value.replace(/\D/g, '');
     if (e.target.value.length > 8) {
         e.target.value = e.target.value.slice(0, 8);
@@ -509,14 +478,12 @@ formUsuario.usuario_tel.addEventListener('input', (e) => {
 });
 
 formUsuario.usuario_dpi.addEventListener('input', (e) => {
-    // Solo permitir números
     e.target.value = e.target.value.replace(/\D/g, '');
     if (e.target.value.length > 13) {
         e.target.value = e.target.value.slice(0, 13);
     }
 });
 
-// Validación de confirmación de contraseña en tiempo real
 formUsuario.confirmar_contra.addEventListener('input', () => {
     const password = formUsuario.usuario_contra.value;
     const confirmar = formUsuario.confirmar_contra.value;

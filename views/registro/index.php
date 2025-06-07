@@ -130,7 +130,7 @@
                 <div id="contenedor_tabla">
                     <div class="table-responsive p-2">
                         <table class="table table-striped table-hover table-bordered w-100 table-sm" id="TableUsuarios">
-                            <!-- La tabla se generará dinámicamente con JavaScript -->
+                            <!-- La tabla con JavaScript -->
                         </table>
                     </div>
                 </div>
