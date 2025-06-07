@@ -6,6 +6,8 @@ use MVC\Router;
 use Controllers\AppController;
 use Controllers\LoginController;
 use Controllers\RegistroController;
+use Controllers\AplicacionController;
+
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
 
@@ -24,6 +26,20 @@ $router->post('/registro/guardar', [RegistroController::class,'guardarAPI']);
 $router->get('/registro/buscarAPI', [RegistroController::class,'buscarAPI']);
 $router->post('/registro/modificarAPI', [RegistroController::class,'modificarAPI']);
 $router->get('/registro/eliminarAPI', [RegistroController::class,'eliminarAPI']);
+
+//RUTAS PARA APLICACIONES
+$router->get('/aplicaciones', [AplicacionController::class, 'renderizarPagina']);
+$router->post('/aplicaciones/guardar', [AplicacionController::class, 'guardarAPI']);
+$router->get('/aplicaciones/buscarAPI', [AplicacionController::class, 'buscarAPI']);
+$router->post('/aplicaciones/modificarAPI', [AplicacionController::class, 'modificarAPI']);
+$router->get('/aplicaciones/eliminarAPI', [AplicacionController::class, 'eliminarAPI']);
+
+// PERMISOS
+$router->get('/permisos', [PermisosController::class, 'renderizarPagina']);
+$router->post('/permisos/guardar', [PermisosController::class, 'guardarAPI']);
+$router->get('/permisos/buscarAPI', [PermisosController::class, 'buscarAPI']);
+$router->post('/permisos/modificarAPI', [PermisosController::class, 'modificarAPI']);
+$router->get('/permisos/eliminarAPI', [PermisosController::class, 'eliminarAPI']);
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

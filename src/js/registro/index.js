@@ -499,12 +499,6 @@ const limpiarFormulario = () => {
     btnModificar.classList.add('d-none');
 };
 
-// Event listeners
-formUsuario.addEventListener('submit', guardarUsuario);
-btnBuscarUsuarios.addEventListener('click', buscarUsuarios);
-btnLimpiar.addEventListener('click', limpiarFormulario);
-usuario_fotografia.addEventListener('change', mostrarVistaPrevia);
-
 // Validación en tiempo real para campos específicos
 formUsuario.usuario_tel.addEventListener('input', (e) => {
     // Solo permitir números
@@ -542,5 +536,9 @@ formUsuario.addEventListener('submit', (e) => {
     }
 });
 
-
+// Event listeners
+btnBuscarUsuarios.addEventListener('click', buscarUsuarios);
+btnModificar.addEventListener('click', modificarUsuario);
+btnLimpiar.addEventListener('click', limpiarFormulario);
+usuario_fotografia.addEventListener('change', mostrarVistaPrevia);
 console.log('Sistema de registro inicializado correctamente');
