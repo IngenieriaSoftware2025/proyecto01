@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 const formUsuario = document.getElementById('formUsuario');
 const btnGuardar = document.getElementById('BtnGuardar');
 const btnLimpiar = document.getElementById('BtnLimpiar');
+const btnModificar = document.getElementById('BtnModificar');
 const btnBuscarUsuarios = document.getElementById('BtnBuscarUsuarios');
 const usuario_fotografia = document.getElementById('usuario_fotografia');
 const preview_foto = document.getElementById('preview_foto');
@@ -263,28 +264,23 @@ const buscarUsuarios = async () => {
     }
 };
 
-// Función para mostrar tabla de usuarios
+// Función para mostrar tabla de usuarios con fotografías 
 const mostrarTablaUsuarios = (usuarios) => {
-    // Mostrar sección de usuarios
     seccion_usuarios.classList.remove('d-none');
     seccion_usuarios.classList.add('fade-in');
-    
-    // Ocultar mensaje sin datos
     mensaje_sin_datos.classList.add('d-none');
     
-    // Destruir tabla existente si existe
     if (tabla_usuarios) {
         tabla_usuarios.destroy();
         document.getElementById('TableUsuarios').innerHTML = '';
     }
     
-    // Configurar DataTable
     tabla_usuarios = new DataTable('#TableUsuarios', {
         data: usuarios,
         language: lenguaje,
         responsive: true,
         pageLength: 10,
-        order: [[0, 'desc']], // Ordenar por ID descendente
+        order: [[0, 'desc']],
         columns: [
             {
                 title: 'ID',
@@ -292,12 +288,27 @@ const mostrarTablaUsuarios = (usuarios) => {
                 width: '5%'
             },
             {
+                title: 'Foto',
+                data: 'usuario_fotografia',
+                width: '8%',
+                orderable: false,
+                render: (data, type, row) => {
+                    if (data && data.trim() !== '') {
+                        return `<img src="/proyecto01/storage/fotosUsuarios/${data}" 
+                                    alt="Foto" class="img-thumbnail rounded-circle foto-usuario" 
+                                    style="width: 40px; height: 40px; object-fit: cover; cursor: pointer;"
+                                    data-imagen="/proyecto01/storage/fotosUsuarios/${data}"
+                                    data-nombre="${row.usuario_nom1} ${row.usuario_ape1}">`;
+                    } else {
+                        return `<i class="bi bi-person-circle text-muted" style="font-size: 40px;"></i>`;
+                    }
+                }
+            },
+            {
                 title: 'Nombre Completo',
                 data: null,
-                render: (data) => {
-                    return `${data.usuario_nom1} ${data.usuario_nom2 || ''} ${data.usuario_ape1} ${data.usuario_ape2 || ''}`.trim();
-                },
-                width: '25%'
+                render: (data) => `${data.usuario_nom1} ${data.usuario_nom2 || ''} ${data.usuario_ape1} ${data.usuario_ape2 || ''}`.trim(),
+                width: '18%'
             },
             {
                 title: 'Teléfono',
@@ -307,33 +318,176 @@ const mostrarTablaUsuarios = (usuarios) => {
             {
                 title: 'DPI',
                 data: 'usuario_dpi',
-                width: '15%'
+                width: '12%'
             },
             {
                 title: 'Correo',
                 data: 'usuario_correo',
-                width: '20%'
-            },
-            {
-                title: 'Dirección',
-                data: 'usuario_direc',
-                width: '20%',
-                render: (data) => {
-                    return data.length > 50 ? data.substring(0, 50) + '...' : data;
-                }
+                width: '15%'
             },
             {
                 title: 'Estado',
                 data: 'usuario_situacion',
-                width: '5%',
-                render: (data) => {
-                    return data == 1 
-                        ? '<span class="badge bg-success">Activo</span>'
-                        : '<span class="badge bg-danger">Inactivo</span>';
+                width: '8%',
+                render: (data) => data == 1 
+                    ? '<span class="badge bg-success">Activo</span>'
+                    : '<span class="badge bg-danger">Inactivo</span>'
+            },
+            {
+                title: 'Acciones',
+                data: 'usuario_id',
+                width: '14%',
+                orderable: false,
+                render: (data, type, row) => {
+                    return `<div class='d-flex justify-content-center'>
+                                <button class='btn btn-warning btn-sm modificar mx-1' 
+                                    data-id="${data}" 
+                                    data-nom1="${row.usuario_nom1}"
+                                    data-nom2="${row.usuario_nom2 || ''}"
+                                    data-ape1="${row.usuario_ape1}"
+                                    data-ape2="${row.usuario_ape2 || ''}"
+                                    data-tel="${row.usuario_tel}"
+                                    data-dpi="${row.usuario_dpi}"
+                                    data-direc="${row.usuario_direc}"
+                                    data-correo="${row.usuario_correo}">
+                                    <i class='bi bi-pencil me-1'></i>Editar
+                                </button>
+                                <button class='btn btn-danger btn-sm eliminar mx-1' data-id="${data}">
+                                    <i class="bi bi-trash me-1"></i>Eliminar
+                                </button>
+                            </div>`;
                 }
             }
         ]
     });
+    
+    // Event listeners para fotos y botones
+    setTimeout(() => {
+        // Fotos
+        document.querySelectorAll('.foto-usuario').forEach(foto => {
+            foto.addEventListener('click', function() {
+                mostrarImagenCompleta(this.getAttribute('data-imagen'), this.getAttribute('data-nombre'));
+            });
+        });
+        
+        // Botones modificar y eliminar
+        document.querySelectorAll('.modificar').forEach(btn => {
+            btn.addEventListener('click', llenarFormulario);
+        });
+        
+        document.querySelectorAll('.eliminar').forEach(btn => {
+            btn.addEventListener('click', eliminarUsuario);
+        });
+    }, 100);
+};
+
+// Función para mostrar imagen completa en modal
+const mostrarImagenCompleta = (rutaImagen, nombreUsuario) => {
+    Swal.fire({
+        title: `Fotografía de ${nombreUsuario}`,
+        imageUrl: rutaImagen,
+        imageWidth: 400,
+        imageHeight: 400,
+        imageAlt: `Foto de ${nombreUsuario}`,
+        showCloseButton: true,
+        showConfirmButton: false,
+        customClass: {
+            image: 'img-fluid rounded'
+        },
+        didOpen: () => {
+            // Agregar evento para cerrar con click en la imagen
+            const imagen = Swal.getImage();
+            if (imagen) {
+                imagen.style.cursor = 'pointer';
+                imagen.addEventListener('click', () => {
+                    Swal.close();
+                });
+            }
+        }
+    });
+};
+
+// Función para llenar formulario para modificar
+const llenarFormulario = (e) => {
+    const datos = e.currentTarget.dataset;
+    
+    document.getElementById('usuario_id').value = datos.id;
+    document.getElementById('usuario_nom1').value = datos.nom1;
+    document.getElementById('usuario_nom2').value = datos.nom2;
+    document.getElementById('usuario_ape1').value = datos.ape1;
+    document.getElementById('usuario_ape2').value = datos.ape2;
+    document.getElementById('usuario_tel').value = datos.tel;
+    document.getElementById('usuario_dpi').value = datos.dpi;
+    document.getElementById('usuario_direc').value = datos.direc;
+    document.getElementById('usuario_correo').value = datos.correo;
+    
+    btnGuardar.classList.add('d-none');
+    btnModificar.classList.remove('d-none');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// Función para modificar usuario
+const modificarUsuario = async (e) => {
+    e.preventDefault();
+    
+    btnModificar.disabled = true;
+    btnModificar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Modificando...';
+    
+    try {
+        const body = new FormData(formUsuario);
+        const respuesta = await fetch('/proyecto01/registro/modificarAPI', {
+            method: 'POST',
+            body
+        });
+        
+        const data = await respuesta.json();
+        
+        if (data.codigo === 1) {
+            Toast.fire({ icon: 'success', title: data.mensaje });
+            limpiarFormulario();
+            buscarUsuarios();
+        } else {
+            Toast.fire({ icon: 'error', title: data.mensaje });
+        }
+    } catch (error) {
+        Toast.fire({ icon: 'error', title: 'Error de conexión' });
+    } finally {
+        btnModificar.disabled = false;
+        btnModificar.innerHTML = '<i class="bi bi-pencil me-2"></i>Modificar';
+    }
+};
+
+// Función para eliminar usuario
+const eliminarUsuario = async (e) => {
+    const id = e.currentTarget.dataset.id;
+    
+    const confirmacion = await Swal.fire({
+        title: '¿Eliminar usuario?',
+        text: '¿Estás seguro de eliminar este usuario?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (confirmacion.isConfirmed) {
+        try {
+            const respuesta = await fetch(`/proyecto01/registro/eliminarAPI?id=${id}`);
+            const data = await respuesta.json();
+            
+            if (data.codigo === 1) {
+                Toast.fire({ icon: 'success', title: data.mensaje });
+                buscarUsuarios();
+            } else {
+                Toast.fire({ icon: 'error', title: data.mensaje });
+            }
+        } catch (error) {
+            Toast.fire({ icon: 'error', title: 'Error de conexión' });
+        }
+    }
 };
 
 // Función para limpiar formulario
@@ -341,6 +495,8 @@ const limpiarFormulario = () => {
     formUsuario.reset();
     preview_foto.classList.add('d-none');
     limpiarValidacion();
+    btnGuardar.classList.remove('d-none');
+    btnModificar.classList.add('d-none');
 };
 
 // Event listeners
@@ -377,5 +533,14 @@ formUsuario.confirmar_contra.addEventListener('input', () => {
         formUsuario.confirmar_contra.classList.remove('is-invalid');
     }
 });
+
+formUsuario.addEventListener('submit', (e) => {
+    if (btnModificar.classList.contains('d-none')) {
+        guardarUsuario(e);
+    } else {
+        modificarUsuario(e);
+    }
+});
+
 
 console.log('Sistema de registro inicializado correctamente');

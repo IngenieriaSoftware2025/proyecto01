@@ -22,6 +22,8 @@ $router->get('/login/verificarSesion', [LoginController::class, 'verificarSesion
 $router->get('/registro', [RegistroController::class,'renderizarPagina']);
 $router->post('/registro/guardar', [RegistroController::class,'guardarAPI']);
 $router->get('/registro/buscarAPI', [RegistroController::class,'buscarAPI']);
+$router->post('/registro/modificarAPI', [RegistroController::class,'modificarAPI']);
+$router->get('/registro/eliminarAPI', [RegistroController::class,'eliminarAPI']);
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

@@ -15,11 +15,11 @@ class RegistroController extends ActiveRecord
     }
 
     public static function buscarAPI()
-{
-    getHeadersApi();
-    
-    try {
-        $query = "SELECT 
+    {
+        getHeadersApi();
+
+        try {
+            $query = "SELECT 
                     usuario_id,
                     usuario_nom1,
                     usuario_nom2,
@@ -34,25 +34,24 @@ class RegistroController extends ActiveRecord
                   FROM usuario 
                   WHERE usuario_situacion = 1
                   ORDER BY usuario_id DESC";
-                  
-        $usuarios = Usuarios::fetchArray($query);
-        
-        http_response_code(200);
-        echo json_encode([
-            'codigo' => 1,
-            'mensaje' => 'Usuarios encontrados exitosamente',
-            'data' => $usuarios
-        ]);
-        
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode([
-            'codigo' => 0,
-            'mensaje' => 'Error al buscar los usuarios',
-            'detalle' => $e->getMessage()
-        ]);
+
+            $usuarios = Usuarios::fetchArray($query);
+
+            http_response_code(200);
+            echo json_encode([
+                'codigo' => 1,
+                'mensaje' => 'Usuarios encontrados exitosamente',
+                'data' => $usuarios
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Error al buscar los usuarios',
+                'detalle' => $e->getMessage()
+            ]);
+        }
     }
-}
 
     public static function guardarAPI()
     {
@@ -315,5 +314,107 @@ class RegistroController extends ActiveRecord
 
         // Retornar solo el nombre del archivo para guardar en la BD
         return $nombreArchivo;
+    }
+
+    public static function modificarAPI()
+    {
+        getHeadersApi();
+
+        if (empty($_POST['usuario_id'])) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'ID de usuario es requerido'
+            ]);
+            return;
+        }
+
+        try {
+            $usuario = Usuarios::find($_POST['usuario_id']);
+            if (!$usuario) {
+                http_response_code(404);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Usuario no encontrado'
+                ]);
+                return;
+            }
+
+            // Validaciones básicas
+            if (empty($_POST['usuario_nom1']) || empty($_POST['usuario_ape1'])) {
+                http_response_code(400);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Nombre y apellido son obligatorios'
+                ]);
+                return;
+            }
+
+            // Sincronizar datos
+            $usuario->sincronizar($_POST);
+
+            $resultado = $usuario->guardar();
+
+            if ($resultado['resultado']) {
+                http_response_code(200);
+                echo json_encode([
+                    'codigo' => 1,
+                    'mensaje' => 'Usuario modificado correctamente'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error al modificar usuario'
+                ]);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Error interno del servidor',
+                'detalle' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public static function eliminarAPI()
+    {
+        getHeadersApi();
+
+        if (empty($_GET['id'])) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'ID de usuario es requerido'
+            ]);
+            return;
+        }
+
+        try {
+            $query = "UPDATE usuario SET usuario_situacion = 0 WHERE usuario_id = " . intval($_GET['id']);
+            $resultado = Usuarios::SQL($query);
+
+            if ($resultado) {
+                http_response_code(200);
+                echo json_encode([
+                    'codigo' => 1,
+                    'mensaje' => 'Usuario eliminado correctamente'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error al eliminar usuario'
+                ]);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Error interno del servidor',
+                'detalle' => $e->getMessage()
+            ]);
+        }
     }
 }

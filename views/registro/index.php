@@ -156,6 +156,20 @@
     max-height: 150px;
     border-radius: 8px;
 }
+
+.table td {
+    vertical-align: middle;
+}
+
+.img-thumbnail {
+    border: 2px solid #007bff;
+    transition: transform 0.2s ease;
+}
+
+.img-thumbnail:hover {
+    transform: scale(1.1);
+    border-color: #0056b3;
+}
 </style>
 
 <!-- Script de registro -->
