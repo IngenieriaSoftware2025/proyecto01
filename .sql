@@ -63,6 +63,15 @@ FOREIGN KEY (historial_usuario_id) REFERENCES usuario(usuario_id),
 FOREIGN KEY (historial_ruta) REFERENCES rutas(ruta_id)
 );
 
+CREATE TABLE rol(
+rol_id SERIAL PRIMARY KEY,
+rol_nombre VARCHAR(75),
+rol_nombre_ct VARCHAR(25),
+rol_app INTEGER,
+rol_situacion SMALLINT DEFAULT 1,
+FOREIGN KEY (rol_app) REFERENCES aplicacion(app_id)
+);
+
 CREATE TABLE rutas(
 ruta_id SERIAL PRIMARY KEY,
 ruta_app_id INT NOT NULL,
