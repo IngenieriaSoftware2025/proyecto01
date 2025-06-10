@@ -30,10 +30,6 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" aria-current="page" href="/proyecto01/login"><i class="bi bi-door-open me-2"></i>Login</a>
-                    </li>
-
-                    <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="/proyecto01/clientes"><i class="bi bi-person-add me-2"></i>Clientes</a>
                     </li>
 
@@ -74,7 +70,7 @@
                 </ul>
                 <div class="col-lg-1 d-grid mb-lg-0 mb-2">
                     <!-- Ruta relativa desde el archivo donde se incluye menu.php -->
-                    <a href="/menu/" class="btn btn-danger"><i class="bi bi-arrow-bar-left"></i>MENÚ</a>
+                    <a href="/proyecto01/login" class="btn btn-danger"><i class="bi bi-arrow-bar-left"></i>CERRAR SESION</a>
                 </div>
 
 
