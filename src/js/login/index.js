@@ -8,9 +8,9 @@ const btnSpinner = document.getElementById("btnSpinner");
 const usuario_correo = document.getElementById("usuario_correo");
 const usuario_contra = document.getElementById("usuario_contra");
 
-document.addEventListener("DOMContentLoaded", () => {
-  verificarSesionExistente();
-});
+// document.addEventListener("DOMContentLoaded", () => {
+//   verificarSesionExistente();
+// });
 
 const verificarSesionExistente = async () => {
   try {
@@ -127,7 +127,8 @@ const loginAPI = async (e) => {
         showConfirmButton: false,
       });
 
-      window.location.href = datosUsuario.redirect_url;
+      // window.location.href = datosUsuario.redirect_url;
+      window.location.href = "/proyecto01/";
     } else {
       toggleLoadingState(false);
 
