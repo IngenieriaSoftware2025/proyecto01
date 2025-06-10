@@ -9,6 +9,7 @@ use Controllers\RegistroController;
 use Controllers\AplicacionController;
 use Controllers\PermisosController;
 use Controllers\ClienteController;
+use Controllers\MarcaController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -52,5 +53,11 @@ $router->get('/clientes/buscarAPI', [ClienteController::class, 'buscarAPI']);
 $router->post('/clientes/modificarAPI', [ClienteController::class, 'modificarAPI']);
 $router->get('/clientes/eliminarAPI', [ClienteController::class, 'eliminarAPI']);
 
+// Rutas para Marcas
+$router->get('/marcas', [MarcaController::class, 'renderizarPagina']);
+$router->post('/marcas/guardarAPI', [MarcaController::class, 'guardarAPI']);
+$router->get('/marcas/buscarAPI', [MarcaController::class, 'buscarAPI']);
+$router->post('/marcas/modificarAPI', [MarcaController::class, 'modificarAPI']);
+$router->get('/marcas/eliminarAPI', [MarcaController::class, 'eliminarAPI']);
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();
