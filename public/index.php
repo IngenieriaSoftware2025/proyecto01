@@ -8,6 +8,7 @@ use Controllers\LoginController;
 use Controllers\RegistroController;
 use Controllers\AplicacionController;
 use Controllers\PermisosController;
+use Controllers\ClienteController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -42,6 +43,14 @@ $router->get('/permisos/buscarAPI', [PermisosController::class, 'buscarAPI']);
 $router->get('/permisos/buscarAplicacionesAPI', [PermisosController::class, 'buscarAplicacionesAPI']);
 $router->post('/permisos/modificarAPI', [PermisosController::class, 'modificarAPI']);
 $router->get('/permisos/eliminarAPI', [PermisosController::class, 'eliminarAPI']);
+
+
+// Rutas para Clientes
+$router->get('/clientes', [ClienteController::class, 'renderizarPagina']);
+$router->post('/clientes/guardarAPI', [ClienteController::class, 'guardarAPI']);
+$router->get('/clientes/buscarAPI', [ClienteController::class, 'buscarAPI']);
+$router->post('/clientes/modificarAPI', [ClienteController::class, 'modificarAPI']);
+$router->get('/clientes/eliminarAPI', [ClienteController::class, 'eliminarAPI']);
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

@@ -71,3 +71,22 @@ ruta_descripcion VARCHAR (250) NOT NULL,
 ruta_situacion SMALLINT DEFAULT 1,
 FOREIGN KEY (ruta_app_id) REFERENCES aplicacion(app_id)
 );
+
+CREATE TABLE clientes(
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    telefono VARCHAR(8) NOT NULL,
+    nit VARCHAR(15),
+    correo VARCHAR(150),
+    situacion SMALLINT DEFAULT 1
+);
+
+CREATE TABLE marcas(
+    id SERIAL PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion VARCHAR(250),
+    modelo VARCHAR(100),
+    fecha_creacion DATE DEFAULT TODAY,
+    situacion SMALLINT DEFAULT 1
+);

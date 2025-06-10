@@ -32,6 +32,10 @@
                     </li>
 
                     <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/proyecto01/clientes"><i class="bi bi-person-add me-2"></i>Clientes</a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="/proyecto01/registro"><i class="bi bi-person-add me-2"></i>Usuarios</a>
                     </li>
 

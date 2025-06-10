@@ -9,6 +9,7 @@ module.exports = {
     'js/login/index' : './src/js/login/index.js',
     'js/aplicaciones/index' : './src/js/aplicaciones/index.js',
     'js/permisos/index' : './src/js/permisos/index.js',
+    'js/clientes/index' : './src/js/clientes/index.js',
   },
   output: {
     filename: '[name].js',
