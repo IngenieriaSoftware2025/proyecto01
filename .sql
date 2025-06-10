@@ -90,3 +90,18 @@ CREATE TABLE marcas(
     fecha_creacion DATE DEFAULT TODAY,
     situacion SMALLINT DEFAULT 1
 );
+
+CREATE TABLE inventario (
+    id SERIAL PRIMARY KEY,
+    marca_id INTEGER NOT NULL,
+    numero_serie VARCHAR(50),
+    precio_compra DECIMAL(10,2) NOT NULL,
+    precio_venta DECIMAL(10,2) NOT NULL,
+    stock_disponible INT DEFAULT 1,
+    estado_dispositivo VARCHAR(20) DEFAULT 'NUEVO',
+    estado_inventario VARCHAR(20) DEFAULT 'DISPONIBLE',
+    fecha_ingreso DATE DEFAULT TODAY,
+    observaciones VARCHAR(500),
+    situacion SMALLINT DEFAULT 1,
+    FOREIGN KEY (marca_id) REFERENCES marcas(id)
+);

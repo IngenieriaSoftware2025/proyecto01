@@ -42,6 +42,10 @@
                     </li>
 
                     <li class="nav-item">
+                        <a class="nav-link" aria-current="page" href="/proyecto01/inventario"><i class="bi bi-boxes me-2"></i>Inventario</a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link" aria-current="page" href="/proyecto01/registro"><i class="bi bi-person-add me-2"></i>Usuarios</a>
                     </li>
 
@@ -62,7 +66,6 @@
                             <li>
                                 <a class="dropdown-item nav-link text-white " href="/aplicaciones/nueva"><i class="ms-lg-0 ms-2 bi bi-plus-circle me-2"></i>Subitem</a>
                             </li>
-
 
 
                         </ul>

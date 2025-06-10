@@ -10,6 +10,7 @@ use Controllers\AplicacionController;
 use Controllers\PermisosController;
 use Controllers\ClienteController;
 use Controllers\MarcaController;
+use Controllers\InventarioController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -59,5 +60,14 @@ $router->post('/marcas/guardarAPI', [MarcaController::class, 'guardarAPI']);
 $router->get('/marcas/buscarAPI', [MarcaController::class, 'buscarAPI']);
 $router->post('/marcas/modificarAPI', [MarcaController::class, 'modificarAPI']);
 $router->get('/marcas/eliminarAPI', [MarcaController::class, 'eliminarAPI']);
+
+// Rutas para Inventario
+$router->get('/inventario', [InventarioController::class, 'renderizarPagina']);
+$router->post('/inventario/guardarAPI', [InventarioController::class, 'guardarAPI']);
+$router->get('/inventario/buscarAPI', [InventarioController::class, 'buscarAPI']);
+$router->get('/inventario/buscarMarcasAPI', [InventarioController::class, 'buscarMarcasAPI']);
+$router->post('/inventario/modificarAPI', [InventarioController::class, 'modificarAPI']);
+$router->get('/inventario/eliminarAPI', [InventarioController::class, 'eliminarAPI']);
+
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();
