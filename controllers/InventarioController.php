@@ -136,9 +136,10 @@ class InventarioController extends ActiveRecord
             }
 
             // CREAR INVENTARIO USANDO QUERY DIRECTA PARA MANEJAR FECHA
-            $fechaHoy = date('Y-m-d');
-            $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_venta, stock_disponible, estado_dispositivo, estado_inventario, fecha_ingreso, observaciones, situacion) 
-                      VALUES ($marcaId, '$numeroSerie', $precioCompra, $precioVenta, $stockDisponible, '$estadoDispositivo', 'DISPONIBLE', '$fechaHoy', '$observaciones', 1)";
+            $fechaHoy = date('m/d/Y');
+            // Usar función TODAY de Informix directamente
+$query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_venta, stock_disponible, estado_dispositivo, estado_inventario, fecha_ingreso, observaciones, situacion) 
+          VALUES ($marcaId, '$numeroSerie', $precioCompra, $precioVenta, $stockDisponible, '$estadoDispositivo', 'DISPONIBLE', TODAY, '$observaciones', 1)";
 
             $resultado = self::SQL($query);
 

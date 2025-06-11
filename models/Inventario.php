@@ -17,7 +17,7 @@ class Inventario extends ActiveRecord
        'stock_disponible',
        'estado_dispositivo',
        'estado_inventario',
-       'fecha_ingreso',
+    //    'fecha_ingreso',
        'observaciones',
        'situacion' 
     ];
