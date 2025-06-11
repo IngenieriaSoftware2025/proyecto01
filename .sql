@@ -114,3 +114,48 @@ CREATE TABLE inventario (
     situacion SMALLINT DEFAULT 1,
     FOREIGN KEY (marca_id) REFERENCES marcas(id)
 );
+
+-----------NUEVAS TABLAS-----------------
+-----------------------------------------
+-----------------------------------------
+
+CREATE TABLE ventas (
+    id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    fecha_venta DATE DEFAULT TODAY,
+    estado VARCHAR(20) DEFAULT 'COMPLETADA',
+    usuario_id INT,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+);
+
+CREATE TABLE ventas_detalle (
+    id SERIAL PRIMARY KEY,
+    venta_id INTEGER NOT NULL,
+    inventario_id INTEGER NOT NULL,
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (venta_id) REFERENCES ventas(id),
+    FOREIGN KEY (inventario_id) REFERENCES inventario(id)
+);
+
+CREATE TABLE inventario_config (
+    id SERIAL PRIMARY KEY,
+    inventario_id INTEGER NOT NULL,
+    stock_minimo INT DEFAULT 5,
+    alerta_enviada SMALLINT DEFAULT 0,
+    fecha_creacion DATE DEFAULT TODAY,
+    FOREIGN KEY (inventario_id) REFERENCES inventario(id)
+);
+
+CREATE TABLE movimientos_inventario (
+    id SERIAL PRIMARY KEY,
+    inventario_id INTEGER NOT NULL,
+    tipo_movimiento VARCHAR(20) NOT NULL,
+    cantidad INT NOT NULL,
+    motivo VARCHAR(250),
+    usuario_id INT,
+    fecha_movimiento DATETIME YEAR TO MINUTE,
+    FOREIGN KEY (inventario_id) REFERENCES inventario(id)
+);

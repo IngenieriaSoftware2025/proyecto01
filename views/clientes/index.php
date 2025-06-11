@@ -3,59 +3,71 @@
         <div class="card custom-card shadow-lg" style="border-radius: 10px; border: 1px solid #007bff;">
             <div class="card-body p-3">
                 <div class="row mb-3">
-                    <h5 class="text-center mb-2">Bienvenido a mi aplicacion de celulares</h5>
-                    <h4 class="text-center mb-2 text-primary">Manipulacion de clientes</h4>
+                    <h5 class="text-center mb-2">Sistema de Gestión de Celulares</h5>
+                    <h4 class="text-center mb-2 text-primary">Gestión de Clientes</h4>
                 </div>
 
                 <div class="row justify-content-center p-5 shadow-lg">
                     <form id="FormClientes">
                         <input type="hidden" id="id" name="id">
 
+                        <!-- Fila de Nombres -->
                         <div class="row mb-3 justify-content-center">
                             <div class="col-lg-6">
-                                <label for="nombre" class="form-label">Nombres</label>
-                                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese aca sus nombres">
+                                <label for="nombre" class="form-label">Nombres <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Ingrese los nombres" maxlength="100">
                             </div>
                             <div class="col-lg-6">
-                                <label for="apellido" class="form-label">Apellidos</label>
-                                <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ingrese aca sus apellidos">
+                                <label for="apellido" class="form-label">Apellidos <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="apellido" name="apellido" placeholder="Ingrese los apellidos" maxlength="100">
                             </div>
                         </div>
 
+                        <!-- Fila de Contacto -->
                         <div class="row mb-3 justify-content-center">
                             <div class="col-lg-6">
-                                <label for="telefono" class="form-label">Telefono</label>
-                                <input type="number" class="form-control" id="telefono" name="telefono" placeholder="Ingrese aca su numero de telefono sin el +502">
+                                <label for="telefono" class="form-label">Teléfono <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Ej: 23456789" maxlength="8">
+                                <div class="form-text">8 dígitos, debe iniciar con 2,3,4,5,6,7 u 8</div>
                             </div>
+                            <div class="col-lg-6">
+                                <label for="correo" class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="correo" name="correo" placeholder="ejemplo@correo.com" maxlength="150">
+                            </div>
+                        </div>
+
+                        <!-- Fila de Documentos -->
+                        <div class="row mb-3 justify-content-center">
                             <div class="col-lg-6">
                                 <label for="nit" class="form-label">NIT</label>
-                                <input type="number" class="form-control" id="nit" name="nit" placeholder="Ingrese aca su nit">
+                                <input type="text" class="form-control" id="nit" name="nit" placeholder="NIT: 123456-7 o DPI: 1234567890123">
+                                <div class="form-text">NIT: formato 123456-7</div>
                             </div>
-                        </div>
-
-                        <div class="row mb-3 justify-content-center mb-3">
                             <div class="col-lg-6">
-                                <label for="correo" class="form-label">Correo</label>
-                                <input type="email" class="form-control" id="correo" name="correo" placeholder="Ingrese aca su correo ejemplo@ejemplo.com">
+                                <label for="situacion" class="form-label">Estado del Cliente</label>
+                                <select class="form-control" id="situacion" name="situacion">
+                                    <option value="1">Activo</option>
+                                    <option value="2">Inactivo</option>
+                                    <option value="3">Moroso</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="row justify-content-center mt-5">
+                        <!-- Botones de Acción -->
+                        <div class="row justify-content-center mt-4">
                             <div class="col-auto">
-                                <button class="btn btn-success" type="submit" id="BtnGuardar"><i class="bi bi-floppy me-2"></i>
-                                    Guardar
+                                <button class="btn btn-success" type="submit" id="BtnGuardar">
+                                    <i class="bi bi-floppy me-2"></i>Guardar Cliente
                                 </button>
                             </div>
-
-                            <div class="col-auto ">
-                                <button class="btn btn-warning d-none" type="button" id="BtnModificar"><i class="bi bi-pencil me-2"></i>
-                                    Modificar
+                            <div class="col-auto">
+                                <button class="btn btn-warning d-none" type="button" id="BtnModificar">
+                                    <i class="bi bi-pencil me-2"></i>Modificar
                                 </button>
                             </div>
-
                             <div class="col-auto">
-                                <button class="btn btn-secondary" type="reset" id="BtnLimpiar"><i class="bi bi-arrow-clockwise me-2"></i>
-                                    Limpiar
+                                <button class="btn btn-secondary" type="reset" id="BtnLimpiar">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Limpiar
                                 </button>
                             </div>
                         </div>
@@ -66,6 +78,7 @@
     </div>
 </div>
 
+<!-- Sección de Tabla de Clientes -->
 <div class="row justify-content-center p-3">
     <div class="col-lg-12">
         <div class="card custom-card shadow-lg" style="border-radius: 10px; border: 1px solid #007bff;">
@@ -100,5 +113,6 @@
         </div>
     </div>
 </div>
+
 
 <script src="<?= asset('build/js/clientes/index.js') ?>"></script>
