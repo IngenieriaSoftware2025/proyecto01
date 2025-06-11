@@ -92,7 +92,7 @@ const guardarAPI = async (e) => {
   e.preventDefault();
   BtnGuardar.disabled = true;
 
-  if (!validarFormulario(FormMarcas, ["id"])) {
+  if (!validarFormulario(FormMarcas, ["id", "descripcion"])) {
     Swal.fire({
       position: "center",
       icon: "warning",
@@ -151,13 +151,13 @@ const guardarAPI = async (e) => {
     });
   }
   BtnGuardar.disabled = false;
+  BtnGuardar.innerHTML = '<i class="bi bi-floppy me-2"></i>Guardar';
 };
 
 // Función para buscar marcas
 const buscarAPI = async (e) => {
   // Deshabilitar botón durante la búsqueda
   BtnBuscarMarcas.disabled = true;
-  BtnBuscarMarcas.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Buscando...';
 
   const url = "/proyecto01/marcas/buscarAPI";
   const config = {

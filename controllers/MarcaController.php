@@ -14,6 +14,20 @@ class MarcaController extends ActiveRecord
         $router->render('marcas/index', []);
     }
 
+    // MÉTODO PARA VERIFICAR DUPLICADOS
+    private static function verificarDuplicados($nombre, $modelo, $id = null)
+    {
+        $condicion = $id ? " AND id != " . intval($id) : "";
+        
+        $query = "SELECT COUNT(*) as total FROM marcas 
+                  WHERE LOWER(nombre) = LOWER('" . trim($nombre) . "') 
+                  AND LOWER(modelo) = LOWER('" . trim($modelo) . "') 
+                  AND situacion = 1" . $condicion;
+        
+        $resultado = self::fetchFirst($query);
+        return $resultado['total'] > 0;
+    }
+
     public static function guardarAPI()
     {
         getHeadersApi();
@@ -37,6 +51,19 @@ class MarcaController extends ActiveRecord
         }
 
         try {
+             $nombre = trim($_POST['nombre']);
+            $modelo = trim($_POST['modelo']);
+
+            // VERIFICAR DUPLICADOS
+            if (self::verificarDuplicados($nombre, $modelo)) {
+                http_response_code(400);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Ya existe una marca con el mismo nombre y modelo'
+                ]);
+                return;
+            }
+            
             $_POST['nombre'] = ucwords(strtolower(trim(htmlspecialchars($_POST['nombre']))));
             $_POST['descripcion'] = htmlspecialchars($_POST['descripcion'] ?? '');
             $_POST['modelo'] = htmlspecialchars($_POST['modelo']);
@@ -121,6 +148,19 @@ class MarcaController extends ActiveRecord
         }
 
         try {
+            $nombre = trim($_POST['nombre']);
+            $modelo = trim($_POST['modelo']);
+
+            // VERIFICAR DUPLICADOS EXCLUYENDO EL REGISTRO ACTUAL
+            if (self::verificarDuplicados($nombre, $modelo, $id)) {
+                http_response_code(400);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Ya existe otra marca con el mismo nombre y modelo'
+                ]);
+                return;
+            }
+            
             $marca = Marcas::find($id);
             $marca->sincronizar([
                 'nombre' => $_POST['nombre'],
