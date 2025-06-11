@@ -8,25 +8,21 @@
             <div class="mb-md-5 mt-md-4 pb-5">
 
               <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
-              <p class="text-white-50 mb-5">Por favor ingresa tu correo y contraseña</p>
+              <p class="text-white-50 mb-5">Por favor ingresa tu códio y contraseña</p>
 
-              <form id="formLogin" name="formLogin">
+              <form id="FormLogin" name="FormLogin">
                 
                 <div data-mdb-input-init class="form-outline form-white mb-4">
-                  <input type="email" id="usuario_correo" name="usuario_correo" class="form-control form-control-lg" required />
-                  <label class="form-label" for="usuario_correo">Correo Electronico</label>
+                  <input type="number" id="usu_codigo" name="usu_codigo" class="form-control form-control-lg" required />
+                  <label class="form-label" for="usu_codigo">Código de Usuario</label>
                 </div>
 
                 <div data-mdb-input-init class="form-outline form-white mb-4">
-                  <input type="password" id="usuario_contra" name="usuario_contra" class="form-control form-control-lg" required />
-                  <label class="form-label" for="usuario_contra">Contraseña</label>
+                  <input type="password" id="usu_password" name="usu_password" class="form-control form-control-lg" required />
+                  <label class="form-label" for="usu_password">Contraseña</label>
                 </div>
 
-                <p class="small mb-5 pb-lg-2">
-                  <a class="text-white-50" href="#!">Olvidaste tu contraseña?</a>
-                </p>
-
-                <button id="btnLogin" class="btn btn-outline-light btn-lg px-5" type="submit">
+                <button id="BtnIniciar" class="btn btn-outline-light btn-lg px-5" type="submit">
                   <span id="btnText">Iniciar Sesión</span>
                   <span id="btnSpinner" class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
                 </button>

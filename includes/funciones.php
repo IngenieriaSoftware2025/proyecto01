@@ -17,13 +17,13 @@ function s($html) {
 function isAuth() {
     session_start();
     if(!isset($_SESSION['login'])) {
-        header('Location: /');
+        header('Location: /proyecto01/');
     }
 }
 function isAuthApi() {
     getHeadersApi();
     session_start();
-    if(!isset($_SESSION['auth_user'])) {
+    if(!isset($_SESSION['login'])) {
         echo json_encode([    
             "mensaje" => "No esta autenticado",
 
@@ -35,39 +35,45 @@ function isAuthApi() {
 
 function isNotAuth(){
     session_start();
-    if(isset($_SESSION['auth'])) {
-        header('Location: /auth/');
+    if(isset($_SESSION['login'])) {
+        header('Location: /proyecto01/inicio');
     }
 }
 
 
-function hasPermission(array $permisos){
-
-    $comprobaciones = [];
-    foreach ($permisos as $permiso) {
-
-        $comprobaciones[] = !isset($_SESSION[$permiso]) ? false : true;
-      
+function hasPermission(array $roles_permitidos){
+    session_start();
+    
+    if(!isset($_SESSION['login']) || !isset($_SESSION['rol'])) {
+        header('Location: /proyecto01/');
+        exit;
     }
 
-    if(array_search(true, $comprobaciones) !== false){}else{
-        header('Location: /');
+    $rol_usuario = $_SESSION['rol'];
+    
+    if(!in_array($rol_usuario, $roles_permitidos)) {
+        header('Location: /proyecto01/inicio');
+        exit;
     }
 }
 
-function hasPermissionApi(array $permisos){
+function hasPermissionApi(array $roles_permitidos){
     getHeadersApi();
-    $comprobaciones = [];
-    foreach ($permisos as $permiso) {
-
-        $comprobaciones[] = !isset($_SESSION[$permiso]) ? false : true;
-      
+    session_start();
+    
+    if(!isset($_SESSION['login']) || !isset($_SESSION['rol'])) {
+        echo json_encode([     
+            "mensaje" => "No está autenticado",
+            "codigo" => 4,
+        ]);
+        exit;
     }
 
-    if(array_search(true, $comprobaciones) !== false){}else{
+    $rol_usuario = $_SESSION['rol'];
+    
+    if(!in_array($rol_usuario, $roles_permitidos)) {
         echo json_encode([     
-            "mensaje" => "No tiene permisos",
-
+            "mensaje" => "No tiene permisos para esta acción",
             "codigo" => 4,
         ]);
         exit;
