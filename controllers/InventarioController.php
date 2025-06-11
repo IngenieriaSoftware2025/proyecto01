@@ -15,6 +15,27 @@ class InventarioController extends ActiveRecord
         $router->render('inventario/index', []);
     }
 
+    // MÉTODO PARA VALIDAR NÚMERO DE SERIE
+    private static function validarNumeroSerie($numeroSerie)
+    {
+        // Formato: letras seguidas de números, mínimo 6 caracteres
+        return preg_match('/^[A-Z0-9]{6,20}$/', strtoupper($numeroSerie));
+    }
+
+    // MÉTODO PARA VERIFICAR DUPLICADOS
+    private static function verificarDuplicados($numeroSerie, $id = null)
+    {
+        $condicion = $id ? " AND id != " . intval($id) : "";
+        $numeroSerie = strtoupper(trim($numeroSerie));
+
+        $query = "SELECT COUNT(*) as total FROM inventario 
+                  WHERE UPPER(numero_serie) = '" . $numeroSerie . "' 
+                  AND situacion = 1" . $condicion;
+
+        $resultado = self::fetchFirst($query);
+        return $resultado['total'] > 0;
+    }
+
     public static function guardarAPI()
     {
         getHeadersApi();
@@ -37,6 +58,16 @@ class InventarioController extends ActiveRecord
             return;
         }
 
+        // VALIDACIÓN NÚMERO DE SERIE
+        if (!self::validarNumeroSerie($_POST['numero_serie'])) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Número de serie inválido. Use formato alfanumérico de 6-20 caracteres'
+            ]);
+            return;
+        }
+
         if (empty($_POST['precio_compra']) || $_POST['precio_compra'] <= 0) {
             http_response_code(400);
             echo json_encode([
@@ -55,37 +86,62 @@ class InventarioController extends ActiveRecord
             return;
         }
 
+        // VALIDACIÓN STOCK
+        if (!isset($_POST['stock_disponible']) || intval($_POST['stock_disponible']) < 0) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'El stock debe ser mayor o igual a 0'
+            ]);
+            return;
+        }
+
         try {
-            $consulta_serie = "SELECT COUNT(*) as total FROM inventario WHERE numero_serie = '" . 
-            htmlspecialchars($_POST['numero_serie']) . "' AND situacion = 1";
-            $existe_serie = self::fetchFirst($consulta_serie);
-            
-            if ($existe_serie && $existe_serie['total'] > 0) {
+            $numeroSerie = strtoupper(trim($_POST['numero_serie']));
+
+            // VERIFICAR DUPLICADOS
+            if (self::verificarDuplicados($numeroSerie)) {
                 http_response_code(400);
                 echo json_encode([
                     'codigo' => 0,
-                    'mensaje' => 'Ya existe un dispositivo con ese número de serie'
+                    'mensaje' => 'Ya existe un dispositivo con este número de serie'
                 ]);
                 return;
             }
 
-            $marca_id = intval($_POST['marca_id']);
-            $numero_serie = htmlspecialchars($_POST['numero_serie']);
-            $precio_compra = floatval($_POST['precio_compra']);
-            $precio_venta = floatval($_POST['precio_venta']);
-            $stock_disponible = intval($_POST['stock_disponible'] ?? 1);
-            $estado_dispositivo = htmlspecialchars($_POST['estado_dispositivo'] ?? 'NUEVO');
-            $observaciones = htmlspecialchars($_POST['observaciones'] ?? '');
-
-            if (!in_array($estado_dispositivo, ['NUEVO', 'USADO', 'REPARADO'])) {
-                $estado_dispositivo = 'NUEVO';
+            // VERIFICAR QUE LA MARCA EXISTE
+            $marca = Marcas::find($_POST['marca_id']);
+            if (!$marca) {
+                http_response_code(400);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'La marca seleccionada no existe'
+                ]);
+                return;
             }
 
-            $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_venta, stock_disponible, estado_dispositivo, estado_inventario, observaciones, situacion) 
-                      VALUES ($marca_id, '$numero_serie', $precio_compra, $precio_venta, $stock_disponible, '$estado_dispositivo', 'DISPONIBLE', '$observaciones', 1)";
-            
+
+            // SANITIZAR DATOS
+            $marcaId = intval($_POST['marca_id']);
+            $precioCompra = floatval($_POST['precio_compra']);
+            $precioVenta = floatval($_POST['precio_venta']);
+            $stockDisponible = intval($_POST['stock_disponible']);
+            $estadoDispositivo = htmlspecialchars($_POST['estado_dispositivo'] ?? 'NUEVO');
+            $observaciones = htmlspecialchars($_POST['observaciones'] ?? '');
+
+            // VALIDAR ESTADO DISPOSITIVO
+            $estadosValidos = ['NUEVO', 'USADO', 'REPARADO'];
+            if (!in_array($estadoDispositivo, $estadosValidos)) {
+                $estadoDispositivo = 'NUEVO';
+            }
+
+            // CREAR INVENTARIO USANDO QUERY DIRECTA PARA MANEJAR FECHA
+            $fechaHoy = date('Y-m-d');
+            $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_venta, stock_disponible, estado_dispositivo, estado_inventario, fecha_ingreso, observaciones, situacion) 
+                      VALUES ($marcaId, '$numeroSerie', $precioCompra, $precioVenta, $stockDisponible, '$estadoDispositivo', 'DISPONIBLE', '$fechaHoy', '$observaciones', 1)";
+
             $resultado = self::SQL($query);
-            
+
             if ($resultado) {
                 http_response_code(200);
                 echo json_encode([
@@ -96,7 +152,7 @@ class InventarioController extends ActiveRecord
                 http_response_code(500);
                 echo json_encode([
                     'codigo' => 0,
-                    'mensaje' => 'Error al guardar el dispositivo'
+                    'mensaje' => 'Error al guardar el dispositivo en la base de datos'
                 ]);
             }
 
@@ -104,7 +160,7 @@ class InventarioController extends ActiveRecord
             http_response_code(500);
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error interno del servidor',
+                'mensaje' => 'Error al guardar el dispositivo',
                 'detalle' => $e->getMessage()
             ]);
         }
@@ -114,15 +170,16 @@ class InventarioController extends ActiveRecord
     {
         getHeadersApi();
         try {
-            $consulta = "SELECT i.id, i.numero_serie, i.precio_compra, i.precio_venta, 
+            $consulta = "SELECT i.id, i.marca_id, i.numero_serie, i.precio_compra, i.precio_venta, 
                                i.stock_disponible, i.estado_dispositivo, i.estado_inventario, 
-                               i.fecha_ingreso, i.observaciones,
+                               TO_CHAR(i.fecha_ingreso, '%d/%m/%Y') as fecha_ingreso, 
+                               i.observaciones,
                                m.nombre as marca_nombre, m.modelo as marca_modelo
                         FROM inventario i 
                         INNER JOIN marcas m ON i.marca_id = m.id 
                         WHERE i.situacion = 1 
                         ORDER BY i.fecha_ingreso DESC";
-            
+
             $inventario = self::fetchArray($consulta);
 
             if (count($inventario) > 0) {
@@ -136,8 +193,7 @@ class InventarioController extends ActiveRecord
                 http_response_code(400);
                 echo json_encode([
                     'codigo' => 0,
-                    'mensaje' => 'No hay dispositivos en inventario',
-                    'detalle' => 'inventario vacío'
+                    'mensaje' => 'No hay dispositivos en inventario'
                 ]);
             }
         } catch (Exception $e) {
@@ -177,82 +233,94 @@ class InventarioController extends ActiveRecord
     {
         getHeadersApi();
 
+        if (empty($_POST['id'])) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'ID de dispositivo es requerido'
+            ]);
+            return;
+        }
+
         $id = $_POST['id'];
 
+        // VALIDACIONES BÁSICAS
         if (empty($_POST['marca_id'])) {
             http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'La marca es obligatoria'
-            ]);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'Debe seleccionar una marca']);
             return;
         }
 
-        if (empty($_POST['numero_serie'])) {
+        if (empty($_POST['numero_serie']) || !self::validarNumeroSerie($_POST['numero_serie'])) {
             http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El número de serie es obligatorio'
-            ]);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'Número de serie inválido']);
             return;
         }
 
-        if (empty($_POST['precio_compra']) || $_POST['precio_compra'] <= 0) {
+        if (empty($_POST['precio_compra']) || floatval($_POST['precio_compra']) <= 0) {
             http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El precio de compra debe ser mayor a 0'
-            ]);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El precio de compra debe ser mayor a 0']);
             return;
         }
 
-        if (empty($_POST['precio_venta']) || $_POST['precio_venta'] <= 0) {
+        if (empty($_POST['precio_venta']) || floatval($_POST['precio_venta']) <= 0) {
             http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'El precio de venta debe ser mayor a 0'
-            ]);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El precio de venta debe ser mayor a 0']);
+            return;
+        }
+
+        if (!isset($_POST['stock_disponible']) || intval($_POST['stock_disponible']) < 0) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'El stock debe ser mayor o igual a 0']);
             return;
         }
 
         try {
-            $consulta_serie = "SELECT COUNT(*) as total FROM inventario WHERE numero_serie = '" . 
-                            htmlspecialchars($_POST['numero_serie']) . "' AND id != " . $id . " AND situacion = 1";
-            $existe_serie = self::fetchFirst($consulta_serie);
-            
-            if ($existe_serie && $existe_serie['total'] > 0) {
+            $numeroSerie = strtoupper(trim($_POST['numero_serie']));
+
+            // VERIFICAR DUPLICADOS EXCLUYENDO EL REGISTRO ACTUAL
+            if (self::verificarDuplicados($numeroSerie, $id)) {
                 http_response_code(400);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Ya existe otro dispositivo con ese número de serie'
-                ]);
+                echo json_encode(['codigo' => 0, 'mensaje' => 'Ya existe otro dispositivo con este número de serie']);
                 return;
             }
 
-            $dispositivo = Inventario::find($id);
-            
-            if (!$dispositivo) {
+            // VERIFICAR QUE EL DISPOSITIVO EXISTE
+            $inventario = Inventario::find($id);
+            if (!$inventario) {
                 http_response_code(404);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Dispositivo no encontrado'
-                ]);
+                echo json_encode(['codigo' => 0, 'mensaje' => 'Dispositivo no encontrado']);
                 return;
             }
 
-            $dispositivo->sincronizar([
-                'marca_id' => $_POST['marca_id'],
-                'numero_serie' => $_POST['numero_serie'],
-                'precio_compra' => $_POST['precio_compra'],
-                'precio_venta' => $_POST['precio_venta'],
-                'stock_disponible' => $_POST['stock_disponible'],
-                'estado_dispositivo' => $_POST['estado_dispositivo'],
-                'observaciones' => $_POST['observaciones']
-            ]);
+            // SANITIZAR DATOS
+            $marcaId = intval($_POST['marca_id']);
+            $precioCompra = floatval($_POST['precio_compra']);
+            $precioVenta = floatval($_POST['precio_venta']);
+            $stockDisponible = intval($_POST['stock_disponible']);
+            $estadoDispositivo = htmlspecialchars($_POST['estado_dispositivo'] ?? 'NUEVO');
+            $observaciones = htmlspecialchars($_POST['observaciones'] ?? '');
 
-            $resultado = $dispositivo->actualizar();
-            
-            if ($resultado['resultado']) {
+            // VALIDAR ESTADO DISPOSITIVO
+            $estadosValidos = ['NUEVO', 'USADO', 'REPARADO'];
+            if (!in_array($estadoDispositivo, $estadosValidos)) {
+                $estadoDispositivo = 'NUEVO';
+            }
+
+            // ACTUALIZAR USANDO QUERY DIRECTA
+            $query = "UPDATE inventario SET 
+                        marca_id = $marcaId,
+                        numero_serie = '$numeroSerie',
+                        precio_compra = $precioCompra,
+                        precio_venta = $precioVenta,
+                        stock_disponible = $stockDisponible,
+                        estado_dispositivo = '$estadoDispositivo',
+                        observaciones = '$observaciones'
+                      WHERE id = " . intval($id);
+
+            $resultado = self::SQL($query);
+
+            if ($resultado) {
                 http_response_code(200);
                 echo json_encode([
                     'codigo' => 1,
@@ -265,12 +333,12 @@ class InventarioController extends ActiveRecord
                     'mensaje' => 'Error al modificar el dispositivo'
                 ]);
             }
-            
+
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'codigo' => 0,
-                'mensaje' => 'Error interno del servidor',
+                'mensaje' => 'Error al modificar el dispositivo',
                 'detalle' => $e->getMessage()
             ]);
         }
@@ -279,7 +347,7 @@ class InventarioController extends ActiveRecord
     public static function eliminarAPI()
     {
         getHeadersApi();
-        
+
         if (empty($_GET['id'])) {
             http_response_code(400);
             echo json_encode([
@@ -291,16 +359,24 @@ class InventarioController extends ActiveRecord
 
         try {
             $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
-            
-            $update = "UPDATE inventario SET situacion = 0 WHERE id = " . self::$db->quote($id);
+
+            $update = "UPDATE inventario SET situacion = 0 WHERE id = " . intval($id);
             $resultado = self::SQL($update);
-            
-            http_response_code(200);
-            echo json_encode([
-                'codigo' => 1,
-                'mensaje' => 'Dispositivo eliminado del inventario correctamente'
-            ]);
-            
+
+            if ($resultado) {
+                http_response_code(200);
+                echo json_encode([
+                    'codigo' => 1,
+                    'mensaje' => 'Dispositivo eliminado del inventario correctamente'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error al eliminar el dispositivo'
+                ]);
+            }
+
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
