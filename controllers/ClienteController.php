@@ -11,6 +11,7 @@ class ClienteController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth(); // Verificar que esté logueado
         $router->render('clientes/index', []);
     }
 
@@ -76,6 +77,7 @@ class ClienteController extends ActiveRecord
 
     public static function guardarAPI()
     {
+        hasPermissionApi(['ADMIN', 'USER']); // Ambos roles pueden crear clientes
         getHeadersApi();
 
         // VALIDACIONES BÁSICAS
@@ -180,6 +182,7 @@ class ClienteController extends ActiveRecord
 
     public static function buscarAPI()
     {
+        hasPermissionApi(['ADMIN', 'USER']); // Ambos roles pueden ver clientes
         getHeadersApi();
         try {
             $consulta = "SELECT id, nombre, apellido, telefono, nit, correo, situacion 
@@ -241,6 +244,7 @@ class ClienteController extends ActiveRecord
 
     public static function modificarAPI()
     {
+        hasPermissionApi(['ADMIN']); // Solo ADMIN puede modificar
         getHeadersApi();
 
         $id = $_POST['id'];
@@ -313,6 +317,7 @@ class ClienteController extends ActiveRecord
 
     public static function eliminarAPI()
     {
+        hasPermissionApi(['ADMIN']); // Solo ADMIN puede eliminar
         getHeadersApi();
         try {
             $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);

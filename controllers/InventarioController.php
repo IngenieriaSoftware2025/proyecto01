@@ -12,6 +12,7 @@ class InventarioController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('inventario/index', []);
     }
 
@@ -38,6 +39,7 @@ class InventarioController extends ActiveRecord
 
     public static function guardarAPI()
     {
+        hasPermissionApi(['ADMIN', 'USER']);
         getHeadersApi();
 
         if (empty($_POST['marca_id'])) {
@@ -138,7 +140,7 @@ class InventarioController extends ActiveRecord
             // CREAR INVENTARIO USANDO QUERY DIRECTA PARA MANEJAR FECHA
             $fechaHoy = date('m/d/Y');
             // Usar función TODAY de Informix directamente
-$query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_venta, stock_disponible, estado_dispositivo, estado_inventario, fecha_ingreso, observaciones, situacion) 
+            $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_venta, stock_disponible, estado_dispositivo, estado_inventario, fecha_ingreso, observaciones, situacion) 
           VALUES ($marcaId, '$numeroSerie', $precioCompra, $precioVenta, $stockDisponible, '$estadoDispositivo', 'DISPONIBLE', TODAY, '$observaciones', 1)";
 
             $resultado = self::SQL($query);
@@ -156,7 +158,6 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
                     'mensaje' => 'Error al guardar el dispositivo en la base de datos'
                 ]);
             }
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -169,6 +170,7 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
 
     public static function buscarAPI()
     {
+        hasPermissionApi(['ADMIN', 'USER']);
         getHeadersApi();
         try {
             $consulta = "SELECT i.id, i.marca_id, i.numero_serie, i.precio_compra, i.precio_venta, 
@@ -209,6 +211,7 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
 
     public static function buscarMarcasAPI()
     {
+        hasPermissionApi(['ADMIN', 'USER']);
         getHeadersApi();
         try {
             $consulta = "SELECT id, nombre, modelo FROM marcas WHERE situacion = 1 ORDER BY nombre, modelo";
@@ -232,6 +235,7 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
 
     public static function modificarAPI()
     {
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
 
         if (empty($_POST['id'])) {
@@ -334,7 +338,6 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
                     'mensaje' => 'Error al modificar el dispositivo'
                 ]);
             }
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -347,6 +350,7 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
 
     public static function eliminarAPI()
     {
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
 
         if (empty($_GET['id'])) {
@@ -377,7 +381,6 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
                     'mensaje' => 'Error al eliminar el dispositivo'
                 ]);
             }
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -388,5 +391,3 @@ $query = "INSERT INTO inventario (marca_id, numero_serie, precio_compra, precio_
         }
     }
 }
-
-?>

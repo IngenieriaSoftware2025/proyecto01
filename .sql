@@ -70,5 +70,26 @@ INSERT INTO permiso_login2025 (permiso_usuario, permiso_rol) VALUES (1,1);
 INSERT INTO permiso_login2025 (permiso_usuario, permiso_rol) VALUES (2,2);
 INSERT INTO permiso_login2025 (permiso_usuario, permiso_rol) VALUES (3,1);
 
+CREATE TABLE ventas (
+    venta_id SERIAL PRIMARY KEY,
+    cliente_id INTEGER NOT NULL,
+    usuario_id INTEGER NOT NULL, -- Quién hizo la venta
+    total DECIMAL(10,2) NOT NULL,
+    fecha_venta DATE DEFAULT TODAY,
+    estado VARCHAR(20) DEFAULT 'COMPLETADA',
+    observaciones VARCHAR(500),
+    situacion SMALLINT DEFAULT 1,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    FOREIGN KEY (usuario_id) REFERENCES usuario_login2025(usu_id)
+);
 
-
+CREATE TABLE venta_detalle (
+    detalle_id SERIAL PRIMARY KEY,
+    venta_id INTEGER NOT NULL,
+    inventario_id INTEGER NOT NULL,
+    cantidad INTEGER NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL,
+    FOREIGN KEY (venta_id) REFERENCES ventas(venta_id),
+    FOREIGN KEY (inventario_id) REFERENCES inventario(id)
+);

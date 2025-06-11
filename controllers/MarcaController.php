@@ -11,6 +11,7 @@ class MarcaController extends ActiveRecord
 {
     public static function renderizarPagina(Router $router)
     {
+        isAuth();
         $router->render('marcas/index', []);
     }
 
@@ -30,6 +31,7 @@ class MarcaController extends ActiveRecord
 
     public static function guardarAPI()
     {
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
 
         if (empty($_POST['nombre'])) {
@@ -94,6 +96,7 @@ class MarcaController extends ActiveRecord
 
     public static function buscarAPI()
     {
+        hasPermissionApi(['ADMIN', 'USER']);
         getHeadersApi();
         try {
             $consulta = "SELECT * FROM marcas WHERE situacion = 1 ORDER BY nombre";
@@ -125,6 +128,7 @@ class MarcaController extends ActiveRecord
 
     public static function modificarAPI()
     {
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
 
         $id = $_POST['id'];
@@ -186,6 +190,7 @@ class MarcaController extends ActiveRecord
 
     public static function eliminarAPI()
     {
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
         try {
             $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
