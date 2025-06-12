@@ -1,21 +1,3 @@
-<?php
-session_start();
-$esAdmin = isset($_SESSION['rol']) && $_SESSION['rol'] === 'ADMIN';
-?>
-
-<!-- Solo mostrar botones de modificar/eliminar si es ADMIN -->
-<?php if($esAdmin): ?>
-    <button class='btn btn-warning btn-sm modificar mx-1'>
-        <i class='bi bi-pencil-square'></i> Editar
-    </button>
-    <button class='btn btn-danger btn-sm eliminar mx-1'>
-        <i class="bi bi-trash3"></i> Eliminar
-    </button>
-<?php else: ?>
-    <span class="text-muted">Solo lectura</span>
-<?php endif; ?>
-
-
 <div class="row justify-content-center p-3">
     <div class="col-lg-10">
         <div class="card custom-card shadow-lg" style="border-radius: 10px; border: 1px solid #007bff;">

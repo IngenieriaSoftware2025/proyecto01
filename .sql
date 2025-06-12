@@ -73,11 +73,11 @@ INSERT INTO permiso_login2025 (permiso_usuario, permiso_rol) VALUES (3,1);
 CREATE TABLE ventas (
     venta_id SERIAL PRIMARY KEY,
     cliente_id INTEGER NOT NULL,
-    usuario_id INTEGER NOT NULL, -- Quién hizo la venta
+    usuario_id INTEGER NOT NULL,
     total DECIMAL(10,2) NOT NULL,
     fecha_venta DATE DEFAULT TODAY,
     estado VARCHAR(20) DEFAULT 'COMPLETADA',
-    observaciones VARCHAR(500),
+    observaciones LVARCHAR(500),
     situacion SMALLINT DEFAULT 1,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (usuario_id) REFERENCES usuario_login2025(usu_id)
