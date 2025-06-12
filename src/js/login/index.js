@@ -47,12 +47,12 @@ const login = async (e) => {
         return;
     }
 
-    // Validar que el código tenga al menos 8 dígitos
+    // Validar que el código tenga al menos 6 dígitos
     if (usuCodigo.value.length < 6) {
         usuCodigo.classList.add('is-invalid');
         Swal.fire({
             title: "Código inválido",
-            text: "El código debe tener al menos 8 dígitos",
+            text: "El código debe tener al menos 6 dígitos",
             icon: "error",
             confirmButtonText: "Entendido"
         });

@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="<?= asset('build/styles.css') ?>">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
     <title>Sistema de Celulares</title>
-    
+
     <!-- Estilos elegantes y sencillos -->
     <style>
         :root {
@@ -191,6 +191,7 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
+
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -203,7 +204,7 @@
                 margin: 1rem 0.5rem;
                 padding: 1.5rem;
             }
-            
+
             .navbar-brand {
                 font-size: 1.125rem;
             }
@@ -226,15 +227,15 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Abrir menú">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            
+
             <a class="navbar-brand" href="/proyecto01/inicio">
                 <img src="<?= asset('./images/cit.png') ?>" width="32" height="32" alt="CIT">
                 Sistema de Celulares
             </a>
-            
+
             <div class="collapse navbar-collapse" id="navbarToggler">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    
+
                     <li class="nav-item">
                         <a class="nav-link" href="/proyecto01/inicio">
                             <i class="bi bi-house me-2"></i>Inicio
@@ -242,8 +243,8 @@
                     </li>
 
                     <!-- MENÚ PARA USUARIOS AUTENTICADOS -->
-                    <?php if(isset($_SESSION['login'])): ?>
-                        
+                    <?php if (isset($_SESSION['login'])): ?>
+
                         <li class="nav-item">
                             <a class="nav-link" href="/proyecto01/clientes">
                                 <i class="bi bi-people me-2"></i>Clientes
@@ -262,8 +263,14 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a class="nav-link" aria-current="page" href="/proyecto01/ventas">
+                                <i class="bi bi-cart3 me-2"></i>Ventas
+                            </a>
+                        </li>
+
                         <!-- MENÚ ADMINISTRADOR -->
-                        <?php if($_SESSION['rol'] === 'ADMIN'): ?>
+                        <?php if ($_SESSION['rol'] === 'ADMIN'): ?>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                     <i class="bi bi-gear me-2"></i>Administración
@@ -293,7 +300,7 @@
                 </ul>
 
                 <!-- INFORMACIÓN DEL USUARIO -->
-                <?php if(isset($_SESSION['login'])): ?>
+                <?php if (isset($_SESSION['login'])): ?>
                     <div class="navbar-nav">
                         <div class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle user-info" href="#" data-bs-toggle="dropdown">
@@ -309,7 +316,9 @@
                                         <i class="bi bi-person me-2"></i>Mi Perfil
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
                                 <li>
                                     <a class="dropdown-item" href="/proyecto01/logout">
                                         <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
@@ -327,13 +336,13 @@
     <div class="progress fixed-bottom">
         <div class="progress-bar progress-bar-animated" id="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
-    
+
     <div class="container-fluid" style="min-height: 85vh">
         <div class="main-container">
             <?php echo $contenido; ?>
         </div>
     </div>
-    
+
     <footer class="footer text-center">
         <div class="container-fluid">
             <p class="mb-0">
@@ -344,32 +353,32 @@
 
     <script>
         // Verificar sesión cada 5 minutos
-        <?php if(isset($_SESSION['login'])): ?>
-        setInterval(async () => {
-            try {
-                const respuesta = await fetch('/proyecto01/verificarSesion');
-                const datos = await respuesta.json();
+        <?php if (isset($_SESSION['login'])): ?>
+            setInterval(async () => {
+                try {
+                    const respuesta = await fetch('/proyecto01/verificarSesion');
+                    const datos = await respuesta.json();
 
-                if (datos.codigo === 0) {
-                    // Mostrar notificación elegante
-                    const notification = document.createElement('div');
-                    notification.className = 'notification';
-                    notification.innerHTML = `
+                    if (datos.codigo === 0) {
+                        // Mostrar notificación elegante
+                        const notification = document.createElement('div');
+                        notification.className = 'notification';
+                        notification.innerHTML = `
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <i class="bi bi-exclamation-triangle-fill" style="color: var(--danger-color);"></i>
                             <span>Su sesión ha expirado. Redirigiendo...</span>
                         </div>
                     `;
-                    document.body.appendChild(notification);
-                    
-                    setTimeout(() => {
-                        window.location.href = '/proyecto01/';
-                    }, 2000);
+                        document.body.appendChild(notification);
+
+                        setTimeout(() => {
+                            window.location.href = '/proyecto01/';
+                        }, 2000);
+                    }
+                } catch (error) {
+                    console.error('Error verificando sesión:', error);
                 }
-            } catch (error) {
-                console.error('Error verificando sesión:', error);
-            }
-        }, 5 * 60 * 1000);
+            }, 5 * 60 * 1000);
         <?php endif; ?>
     </script>
 </body>

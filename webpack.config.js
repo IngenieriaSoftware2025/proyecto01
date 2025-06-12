@@ -12,6 +12,7 @@ module.exports = {
     'js/clientes/index' : './src/js/clientes/index.js',
     'js/marcas/index' : './src/js/marcas/index.js',
     'js/inventario/index' : './src/js/inventario/index.js',
+    'js/ventas/index' : './src/js/ventas/index.js', 
   },
   output: {
     filename: '[name].js',
