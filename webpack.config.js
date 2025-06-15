@@ -13,6 +13,7 @@ module.exports = {
     'js/marcas/index' : './src/js/marcas/index.js',
     'js/inventario/index' : './src/js/inventario/index.js',
     'js/ventas/index' : './src/js/ventas/index.js', 
+    'js/reparaciones/index' : './src/js/reparaciones/index.js',
   },
   output: {
     filename: '[name].js',

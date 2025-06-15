@@ -269,6 +269,12 @@
                             </a>
                         </li>
 
+                        <li class="nav-item">
+                            <a class="nav-link" href="/proyecto01/reparaciones">
+                                <i class="bi bi-tools me-2"></i>Reparaciones
+                            </a>
+                        </li>
+
                         <!-- MENÚ ADMINISTRADOR -->
                         <?php if ($_SESSION['rol'] === 'ADMIN'): ?>
                             <li class="nav-item dropdown">

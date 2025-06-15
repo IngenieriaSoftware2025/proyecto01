@@ -32,7 +32,9 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
                             </div>
                             <div class="col-lg-3">
                                 <label for="dispositivo_marca" class="form-label">Marca <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="dispositivo_marca" name="dispositivo_marca" placeholder="Ej: Samsung, Apple, Xiaomi">
+                                <select class="form-control" id="dispositivo_marca" name="dispositivo_marca">
+                                    <option value="">Seleccione una marca...</option>
+                                </select>
                             </div>
                             <div class="col-lg-3">
                                 <label for="dispositivo_modelo" class="form-label">Modelo <span class="text-danger">*</span></label>
@@ -186,7 +188,7 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
             <div class="modal-body">
                 <form id="FormCambiarEstado">
                     <input type="hidden" id="estado_reparacion_id" name="reparacion_id">
-                    
+
                     <div class="mb-3">
                         <label for="nuevo_estado" class="form-label">Nuevo Estado</label>
                         <select class="form-control" id="nuevo_estado" name="nuevo_estado">
@@ -200,7 +202,7 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
                             <option value="CANCELADO">Cancelado</option>
                         </select>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="observaciones_estado" class="form-label">Observaciones</label>
                         <textarea class="form-control" id="observaciones_estado" name="observaciones" rows="3" placeholder="Observaciones sobre el cambio de estado"></textarea>
@@ -230,14 +232,14 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
             <div class="modal-body">
                 <form id="FormAsignarTecnico">
                     <input type="hidden" id="tecnico_reparacion_id" name="reparacion_id">
-                    
+
                     <div class="mb-3">
                         <label for="tecnico_id" class="form-label">Seleccionar Técnico</label>
                         <select class="form-control" id="tecnico_id" name="tecnico_id">
                             <option value="">Seleccione un técnico...</option>
                         </select>
                     </div>
-                    
+
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle me-2"></i>
                         <strong>Nota:</strong> Solo los administradores pueden asignar técnicos.
@@ -256,50 +258,50 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
 
 <!-- Estilos personalizados -->
 <style>
-.custom-card {
-    border-radius: 10px;
-    border: 1px solid #007bff;
-}
+    .custom-card {
+        border-radius: 10px;
+        border: 1px solid #007bff;
+    }
 
-.table td {
-    vertical-align: middle;
-}
+    .table td {
+        vertical-align: middle;
+    }
 
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
-}
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
 
-.estado-badge {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-}
+    .estado-badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
 
-.btn-estado {
-    transition: all 0.2s ease;
-}
+    .btn-estado {
+        transition: all 0.2s ease;
+    }
 
-.btn-estado:hover {
-    transform: scale(1.05);
-}
+    .btn-estado:hover {
+        transform: scale(1.05);
+    }
 
-.timeline-item {
-    border-left: 3px solid #007bff;
-    padding-left: 15px;
-    margin-bottom: 15px;
-}
+    .timeline-item {
+        border-left: 3px solid #007bff;
+        padding-left: 15px;
+        margin-bottom: 15px;
+    }
 
-.timeline-item:last-child {
-    margin-bottom: 0;
-}
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
 
-.precio-referencia {
-    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-    border: 1px dashed #6c757d;
-}
+    .precio-referencia {
+        background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+        border: 1px dashed #6c757d;
+    }
 
-#dispositivo_imei {
-    font-family: 'Courier New', monospace;
-}
+    #dispositivo_imei {
+        font-family: 'Courier New', monospace;
+    }
 </style>
 
 <!-- Script de reparaciones -->

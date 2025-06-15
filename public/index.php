@@ -8,6 +8,7 @@ use Controllers\ClienteController;
 use Controllers\MarcaController;
 use Controllers\InventarioController;
 use Controllers\VentasController;
+use Controllers\ReparacionesController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -48,6 +49,22 @@ $router->get('/ventas/buscarClientesAPI', [VentasController::class, 'buscarClien
 $router->get('/ventas/buscarInventarioDisponibleAPI', [VentasController::class, 'buscarInventarioDisponibleAPI']);
 $router->get('/ventas/verDetalleAPI', [VentasController::class, 'verDetalleAPI']);
 $router->get('/ventas/anularAPI', [VentasController::class, 'anularAPI']);
+
+// Rutas para Reparaciones
+$router->get('/reparaciones', [ReparacionesController::class, 'renderizarPagina']);
+$router->post('/reparaciones/guardarAPI', [ReparacionesController::class, 'guardarAPI']);
+$router->get('/reparaciones/buscarAPI', [ReparacionesController::class, 'buscarAPI']);
+$router->get('/reparaciones/buscarClientesAPI', [ReparacionesController::class, 'buscarClientesAPI']);
+$router->get('/reparaciones/buscarTiposServicioAPI', [ReparacionesController::class, 'buscarTiposServicioAPI']);
+$router->get('/reparaciones/buscarTecnicosAPI', [ReparacionesController::class, 'buscarTecnicosAPI']);
+$router->get('/reparaciones/buscarMarcasAPI', [ReparacionesController::class, 'buscarMarcasAPI']);
+$router->post('/reparaciones/actualizarEstadoAPI', [ReparacionesController::class, 'actualizarEstadoAPI']);
+$router->post('/reparaciones/asignarTecnicoAPI', [ReparacionesController::class, 'asignarTecnicoAPI']);
+$router->get('/reparaciones/verDetalleAPI', [ReparacionesController::class, 'verDetalleAPI']);
+$router->get('/reparaciones/eliminarAPI', [ReparacionesController::class, 'eliminarAPI']);
+$router->get('/reparaciones/buscarMarcasAPI', [ReparacionesController::class, 'buscarMarcasAPI']);
+$router->get('/reparaciones/buscarModelosPorMarcaAPI', [ReparacionesController::class, 'buscarModelosPorMarcaAPI']);
+
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

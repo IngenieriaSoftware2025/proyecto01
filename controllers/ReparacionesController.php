@@ -66,6 +66,66 @@ class ReparacionesController extends ActiveRecord
         }
     }
 
+    // MÉTODO PARA BUSCAR MARCAS ÚNICAS
+    public static function buscarMarcasAPI()
+    {
+        hasPermissionApi(['ADMIN', 'USER']);
+
+        try {
+            $consulta = "SELECT DISTINCT nombre FROM marcas WHERE situacion = 1 ORDER BY nombre";
+            $marcas = self::fetchArray($consulta);
+
+            http_response_code(200);
+            echo json_encode([
+                'codigo' => 1,
+                'mensaje' => 'Marcas obtenidas exitosamente',
+                'data' => $marcas
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Error al obtener marcas',
+                'detalle' => $e->getMessage()
+            ]);
+        }
+    }
+
+    // MÉTODO PARA BUSCAR MODELOS POR MARCA
+    public static function buscarModelosPorMarcaAPI()
+    {
+        hasPermissionApi(['ADMIN', 'USER']);
+
+        if (empty($_GET['marca'])) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Marca es requerida'
+            ]);
+            return;
+        }
+
+        try {
+            $marca = htmlspecialchars($_GET['marca']);
+            $consulta = "SELECT modelo FROM marcas WHERE nombre = '$marca' AND situacion = 1 ORDER BY modelo";
+            $modelos = self::fetchArray($consulta);
+
+            http_response_code(200);
+            echo json_encode([
+                'codigo' => 1,
+                'mensaje' => 'Modelos obtenidos exitosamente',
+                'data' => $modelos
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'Error al obtener modelos',
+                'detalle' => $e->getMessage()
+            ]);
+        }
+    }
+
     // MÉTODO PARA BUSCAR TÉCNICOS DISPONIBLES
     public static function buscarTecnicosAPI()
     {
@@ -152,7 +212,7 @@ class ReparacionesController extends ActiveRecord
             $observaciones = htmlspecialchars($_POST['observaciones'] ?? '');
 
             // Crear la reparación
-            $fechaHoy = date('Y-m-d');
+            $fechaHoy = date('m/d/Y');
             $queryReparacion = "INSERT INTO reparaciones (
                 cliente_id, dispositivo_marca, dispositivo_modelo, dispositivo_serie, dispositivo_imei,
                 problema_reportado, tipo_servicio_id, presupuesto_inicial, anticipo, 
@@ -160,7 +220,7 @@ class ReparacionesController extends ActiveRecord
             ) VALUES (
                 $clienteId, '$dispositivoMarca', '$dispositivoModelo', '$dispositivoSerie', '$dispositivoImei',
                 '$problemaReportado', $tipoServicioId, $presupuestoInicial, $anticipo,
-                '$observaciones', '$fechaHoy', 'RECIBIDO', 1
+                '$observaciones', 'TODAY', 'RECIBIDO', 1
             )";
 
             $resultado = self::SQL($queryReparacion);
@@ -189,7 +249,6 @@ class ReparacionesController extends ActiveRecord
                     'mensaje' => 'Error al registrar la reparación'
                 ]);
             }
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -219,7 +278,7 @@ class ReparacionesController extends ActiveRecord
                         LEFT JOIN usuario_login2025 t ON r.tecnico_asignado = t.usu_id
                         WHERE r.situacion = 1
                         ORDER BY r.fecha_ingreso DESC, r.reparacion_id DESC";
-            
+
             $reparaciones = self::fetchArray($consulta);
 
             if (count($reparaciones) > 0) {
@@ -268,7 +327,7 @@ class ReparacionesController extends ActiveRecord
 
             // Estados válidos
             $estadosValidos = ['RECIBIDO', 'EN_DIAGNOSTICO', 'DIAGNOSTICADO', 'EN_REPARACION', 'REPARADO', 'ENTREGADO', 'CANCELADO'];
-            
+
             if (!in_array($nuevoEstado, $estadosValidos)) {
                 http_response_code(400);
                 echo json_encode([
@@ -332,7 +391,6 @@ class ReparacionesController extends ActiveRecord
                     'mensaje' => 'Error al actualizar el estado'
                 ]);
             }
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -398,7 +456,6 @@ class ReparacionesController extends ActiveRecord
                     'mensaje' => 'Error al asignar técnico'
                 ]);
             }
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -472,7 +529,6 @@ class ReparacionesController extends ActiveRecord
                     'historial' => $historial
                 ]
             ]);
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -523,7 +579,6 @@ class ReparacionesController extends ActiveRecord
                     'mensaje' => 'Error al cancelar la reparación'
                 ]);
             }
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -534,5 +589,3 @@ class ReparacionesController extends ActiveRecord
         }
     }
 }
-
-?>
