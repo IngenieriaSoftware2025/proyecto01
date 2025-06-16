@@ -1,4 +1,4 @@
-import { Dropdown } from "bootstrap";
+import { Dropdown, Modal } from "bootstrap";
 import Swal from "sweetalert2";
 import DataTable from "datatables.net-bs5";
 import { validarFormulario } from "../funciones";
@@ -355,35 +355,120 @@ const verDetalleReparacion = async (e) => {
     const id = e.currentTarget.dataset.id;
     
     try {
-        const url = `/proyecto01/reparaciones/verDetalleAPI?id=${id}`;
+        const url = `/proyecto01/reparaciones/verDetalleAPI?reparacion_id=${id}`;
         const respuesta = await fetch(url);
         const datos = await respuesta.json();
         
         if (datos.codigo === 1) {
-            // Mostrar modal con detalles
-            // Implementar según tu diseño
+            const { reparacion, historial } = datos.data;
+            
+            // Construir contenido HTML del modal
+            const contenidoHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Información del Cliente</h6>
+                        <p><strong>Nombre:</strong> ${reparacion.cliente_nombre} ${reparacion.cliente_apellido}</p>
+                        <p><strong>Teléfono:</strong> ${reparacion.telefono}</p>
+                        <p><strong>NIT:</strong> ${reparacion.nit || 'No registrado'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Información del Dispositivo</h6>
+                        <p><strong>Marca:</strong> ${reparacion.dispositivo_marca}</p>
+                        <p><strong>Modelo:</strong> ${reparacion.dispositivo_modelo}</p>
+                        <p><strong>Serie:</strong> ${reparacion.dispositivo_serie || 'No registrado'}</p>
+                        <p><strong>IMEI:</strong> ${reparacion.dispositivo_imei || 'No registrado'}</p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <h6 class="text-primary">Problema Reportado</h6>
+                        <p>${reparacion.problema_reportado}</p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Estado y Fechas</h6>
+                        <p><strong>Estado:</strong> ${reparacion.estado}</p>
+                        <p><strong>Fecha Ingreso:</strong> ${reparacion.fecha_ingreso_formato}</p>
+                        <p><strong>Técnico Asignado:</strong> ${reparacion.tecnico_nombre || 'Sin asignar'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-primary">Costos</h6>
+                        <p><strong>Presupuesto Inicial:</strong> Q${parseFloat(reparacion.presupuesto_inicial || 0).toFixed(2)}</p>
+                        <p><strong>Anticipo:</strong> Q${parseFloat(reparacion.anticipo || 0).toFixed(2)}</p>
+                        <p><strong>Costo Final:</strong> Q${parseFloat(reparacion.costo_final || 0).toFixed(2)}</p>
+                    </div>
+                </div>
+                
+                ${historial.length > 0 ? `
+                <hr>
+                <h6 class="text-primary">Historial de Cambios</h6>
+                <div class="timeline">
+                    ${historial.map(item => `
+                        <div class="timeline-item">
+                            <small class="text-muted">${item.fecha_cambio_formato} - ${item.usuario_nombre}</small>
+                            <p class="mb-1"><strong>${item.estado_nuevo}</strong></p>
+                            ${item.observaciones ? `<p class="mb-0 text-muted">${item.observaciones}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                ` : ''}
+            `;
+            
+            // Mostrar modal con contenido
+            document.getElementById('contenido-detalle').innerHTML = contenidoHTML;
+            const modal = new Modal(document.getElementById('ModalVerDetalle'));
+            modal.show();
+            
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: datos.mensaje
+            });
         }
     } catch (error) {
         console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: 'No se pudo obtener el detalle'
+        });
     }
 };
 
 // FUNCIÓN PARA CAMBIAR ESTADO
 const cambiarEstado = (e) => {
     const id = e.currentTarget.dataset.id;
-    // Mostrar modal para cambiar estado
     document.getElementById('reparacion_cambio_estado').value = id;
-    const modal = new bootstrap.Modal(document.getElementById('ModalCambiarEstado'));
-    modal.show();
+    
+    // Verificar si el modal existe antes de instanciarlo
+    const modalElement = document.getElementById('ModalCambiarEstado');
+    if (modalElement) {
+        const modal = new Modal(modalElement);
+        modal.show();
+    } else {
+        console.error('Modal ModalCambiarEstado no encontrado');
+    }
 };
 
 // FUNCIÓN PARA ASIGNAR TÉCNICO
 const asignarTecnico = (e) => {
     const id = e.currentTarget.dataset.id;
-    // Mostrar modal para asignar técnico
     document.getElementById('reparacion_asignar_tecnico').value = id;
-    const modal = new bootstrap.Modal(document.getElementById('ModalAsignarTecnico'));
-    modal.show();
+    
+    // Verificar si el modal existe antes de instanciarlo
+    const modalElement = document.getElementById('ModalAsignarTecnico');
+    if (modalElement) {
+        const modal = new Modal(modalElement);
+        modal.show();
+    } else {
+        console.error('Modal ModalAsignarTecnico no encontrado');
+    }
 };
 
 // FUNCIÓN PARA CONFIRMAR CAMBIO DE ESTADO
@@ -418,7 +503,7 @@ const confirmarCambioEstado = async () => {
                 showConfirmButton: false
             });
 
-            const modal = bootstrap.Modal.getInstance(ModalCambiarEstado);
+            const modal = Modal.getInstance(ModalCambiarEstado);
             modal.hide();
             
             buscarReparaciones();
@@ -473,7 +558,7 @@ const confirmarAsignacion = async () => {
                 showConfirmButton: false
             });
 
-            const modal = bootstrap.Modal.getInstance(ModalAsignarTecnico);
+            const modal = Modal.getInstance(ModalAsignarTecnico);
             modal.hide();
             
             buscarReparaciones();

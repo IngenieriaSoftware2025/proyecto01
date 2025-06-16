@@ -175,24 +175,40 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
     </div>
 </div>
 
+<!-- Modal para Ver Detalle -->
+<div class="modal fade" id="ModalVerDetalle" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalle de Reparación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenido-detalle">
+                <!-- Contenido se carga dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal para Cambiar Estado -->
-<div class="modal fade" id="ModalCambiarEstado" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="ModalCambiarEstado" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title">
-                    <i class="bi bi-arrow-repeat me-2"></i>Cambiar Estado
-                </h5>
+            <div class="modal-header">
+                <h5 class="modal-title">Cambiar Estado de Reparación</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="FormCambiarEstado">
-                    <input type="hidden" id="estado_reparacion_id" name="reparacion_id">
+                    <input type="hidden" id="reparacion_cambio_estado" name="reparacion_id">
 
                     <div class="mb-3">
                         <label for="nuevo_estado" class="form-label">Nuevo Estado</label>
-                        <select class="form-control" id="nuevo_estado" name="nuevo_estado">
-                            <option value="">Seleccione un estado...</option>
+                        <select class="form-control" id="nuevo_estado" name="nuevo_estado" required>
+                            <option value="">Seleccione nuevo estado...</option>
                             <option value="RECIBIDO">Recibido</option>
                             <option value="EN_DIAGNOSTICO">En Diagnóstico</option>
                             <option value="DIAGNOSTICADO">Diagnosticado</option>
@@ -205,52 +221,42 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
 
                     <div class="mb-3">
                         <label for="observaciones_estado" class="form-label">Observaciones</label>
-                        <textarea class="form-control" id="observaciones_estado" name="observaciones" rows="3" placeholder="Observaciones sobre el cambio de estado"></textarea>
+                        <textarea class="form-control" id="observaciones_estado" name="observaciones" rows="3"></textarea>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-warning" id="BtnConfirmarCambioEstado">
-                    <i class="bi bi-check-circle me-2"></i>Cambiar Estado
-                </button>
+                <button type="button" class="btn btn-primary" id="BtnConfirmarCambioEstado">Actualizar Estado</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Modal para Asignar Técnico -->
-<div class="modal fade" id="ModalAsignarTecnico" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="ModalAsignarTecnico" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-info text-white">
-                <h5 class="modal-title">
-                    <i class="bi bi-person-gear me-2"></i>Asignar Técnico
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header">
+                <h5 class="modal-title">Asignar Técnico</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <form id="FormAsignarTecnico">
-                    <input type="hidden" id="tecnico_reparacion_id" name="reparacion_id">
+                    <input type="hidden" id="reparacion_asignar_tecnico" name="reparacion_id">
 
                     <div class="mb-3">
                         <label for="tecnico_id" class="form-label">Seleccionar Técnico</label>
-                        <select class="form-control" id="tecnico_id" name="tecnico_id">
+                        <select class="form-control" id="tecnico_id" name="tecnico_id" required>
                             <option value="">Seleccione un técnico...</option>
+                            <!-- Se carga dinámicamente -->
                         </select>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <strong>Nota:</strong> Solo los administradores pueden asignar técnicos.
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-info" id="BtnConfirmarAsignacion">
-                    <i class="bi bi-check-circle me-2"></i>Asignar Técnico
-                </button>
+                <button type="button" class="btn btn-info" id="BtnConfirmarAsignacion">Asignar Técnico</button>
             </div>
         </div>
     </div>

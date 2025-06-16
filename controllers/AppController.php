@@ -113,7 +113,7 @@ class AppController extends ActiveRecord
     {
         getHeadersApi();
         session_start();
-        
+
         if (!isset($_SESSION['login']) || !isset($_SESSION['tiempo_limite'])) {
             http_response_code(401);
             echo json_encode([
@@ -123,7 +123,7 @@ class AppController extends ActiveRecord
             ]);
             return;
         }
-        
+
         if (time() > $_SESSION['tiempo_limite']) {
             session_destroy();
             http_response_code(401);
@@ -136,7 +136,7 @@ class AppController extends ActiveRecord
         }
 
         $_SESSION['tiempo_limite'] = time() + (2 * 60 * 60);
-        
+
         http_response_code(200);
         echo json_encode([
             'codigo' => 1,
@@ -156,7 +156,7 @@ class AppController extends ActiveRecord
         if (isset($_COOKIE[session_name()])) {
             setcookie(session_name(), '', time() - 3600, '/');
         }
-        
+
         header('Location: /proyecto01/');
         exit;
     }
@@ -164,16 +164,33 @@ class AppController extends ActiveRecord
     public static function renderInicio(Router $router)
     {
         session_start();
-        
+
         // Verificar si hay sesión activa
         if (!isset($_SESSION['login'])) {
             header('Location: /proyecto01/');
             exit;
         }
-        
+
         $router->render('pages/index', [
             'usuario_nombre' => $_SESSION['user'],
             'rol' => $_SESSION['rol']
         ]);
+    }
+
+    public static function renderRegistro(Router $router)
+    {
+        $router->render('registro/index', []);
+    }
+
+    public static function registroAPI()
+    {
+        getHeadersApi();
+
+        if (empty($_POST['usu_nombre']) || empty($_POST['usu_password'])) {
+            http_response_code(400);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'Campos obligatorios faltantes']);
+            return;
+        }
+        echo json_encode(['codigo' => 1, 'mensaje' => 'Registro exitoso']);
     }
 }

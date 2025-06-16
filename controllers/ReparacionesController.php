@@ -126,14 +126,15 @@ class ReparacionesController extends ActiveRecord
         }
     }
 
-    // MÉTODO PARA BUSCAR TÉCNICOS DISPONIBLES
+    // MÉTODO PARA BUSCAR TÉCNICOS DISPONIBLES (NO ADMINISTRADORES)
     public static function buscarTecnicosAPI()
     {
         hasPermissionApi(['ADMIN', 'USER']);
 
         try {
             $consulta = "SELECT usu_id, usu_nombre FROM usuario_login2025 
-                        WHERE usu_situacion = 1 ORDER BY usu_nombre";
+            WHERE usu_situacion = 1 
+            ORDER BY usu_nombre";
             $tecnicos = self::fetchArray($consulta);
 
             http_response_code(200);
