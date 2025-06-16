@@ -67,6 +67,7 @@ $router->get('/reparaciones/verDetalleAPI', [ReparacionesController::class, 'ver
 $router->get('/reparaciones/eliminarAPI', [ReparacionesController::class, 'eliminarAPI']);
 $router->get('/reparaciones/buscarMarcasAPI', [ReparacionesController::class, 'buscarMarcasAPI']);
 $router->get('/reparaciones/buscarModelosPorMarcaAPI', [ReparacionesController::class, 'buscarModelosPorMarcaAPI']);
+$router->post('/reparaciones/actualizarCostoFinalAPI', [ReparacionesController::class, 'actualizarCostoFinalAPI']);
 
 // Rutas para las 4 gráficas principales del dashboard
 $router->get('/reportes', [ReportesController::class, 'renderizarPagina']);

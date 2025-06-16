@@ -208,21 +208,20 @@ class VentasController extends ActiveRecord
         }
     }
 
-    // MÉTODO PARA BUSCAR HISTORIAL DE VENTAS
     public static function buscarAPI()
     {
         hasPermissionApi(['ADMIN', 'USER']);
 
         try {
             $consulta = "SELECT v.venta_id, v.total, TO_CHAR(v.fecha_venta, '%d/%m/%Y') as fecha_venta,
-                               v.estado, v.observaciones,
-                               c.nombre as cliente_nombre, c.apellido as cliente_apellido,
-                               u.usu_nombre as vendedor_nombre
-                        FROM ventas v
-                        INNER JOIN clientes c ON v.cliente_id = c.id
-                        INNER JOIN usuario_login2025 u ON v.usuario_id = u.usu_id
-                        WHERE v.situacion = 1
-                        ORDER BY v.fecha_venta DESC, v.venta_id DESC";
+                           v.estado, v.observaciones, v.tipo_transaccion, v.reparacion_id,
+                           c.nombre as cliente_nombre, c.apellido as cliente_apellido,
+                           u.usu_nombre as vendedor_nombre
+                    FROM ventas v
+                    INNER JOIN clientes c ON v.cliente_id = c.id
+                    INNER JOIN usuario_login2025 u ON v.usuario_id = u.usu_id
+                    WHERE v.situacion = 1
+                    ORDER BY v.fecha_venta DESC, v.venta_id DESC";
 
             $ventas = self::fetchArray($consulta);
 

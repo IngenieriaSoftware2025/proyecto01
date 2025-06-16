@@ -44,10 +44,14 @@ CREATE TABLE usuario_login2025 (
     usu_password VARCHAR(150),
     usu_situacion SMALLINT DEFAULT 1
 ); 
-INSERT INTO usuario_login2025 (usu_nombre, usu_codigo, usu_password) VALUES('HERBERTH GUZMAN', 649103, '$2y$10$Nz6/ESQw7b7xW1Q2j.WEM.g5LQ/NSSmHnhZpfolFAH.ltD0GGRKGS');
-INSERT INTO usuario_login2025 (usu_nombre, usu_codigo, usu_password) VALUES('ANDREA MASELLA', 649104, '$2y$10$Nz6/ESQw7b7xW1Q2j.WEM.g5LQ/NSSmHnhZpfolFAH.ltD0GGRKGS');
-INSERT INTO usuario_login2025 (usu_nombre, usu_codigo, usu_password) VALUES('GABRIELA MASELLA', 649105, '$2y$10$Nz6/ESQw7b7xW1Q2j.WEM.g5LQ/NSSmHnhZpfolFAH.ltD0GGRKGS');
---contraseña password
+INSERT INTO usuario_login2025 (usu_nombre, usu_codigo, usu_password) VALUES('HERBERTH GUZMAN', 649103, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+INSERT INTO usuario_login2025 (usu_nombre, usu_codigo, usu_password) VALUES('ANDREA MASELLA', 649104, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+INSERT INTO usuario_login2025 (usu_nombre, usu_codigo, usu_password) VALUES('GABRIELA MASELLA', 649105, '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+--Código: 649103 - Contraseña: password
+--Código: 649104 - Contraseña: password
+--Código: 649105 - Contraseña: password
+
+SELECT DISTINCT usu_codigo FROM usuario_login2025 WHERE usu_situacion = 1;
 
 CREATE TABLE rol_login2025 (
     rol_id SERIAL PRIMARY KEY,
@@ -58,6 +62,7 @@ CREATE TABLE rol_login2025 (
 INSERT INTO rol_login2025 (rol_nombre, rol_nombre_ct) VALUES ('ADMINISTRADOR', 'ADMIN');
 INSERT INTO rol_login2025 (rol_nombre, rol_nombre_ct) VALUES ('USUARIO', 'USER');
 
+select * from asig_permisos
 CREATE TABLE permiso_login2025 (
     permiso_id SERIAL PRIMARY KEY,
     permiso_usuario INTEGER,
@@ -73,7 +78,7 @@ INSERT INTO permiso_login2025 (permiso_usuario, permiso_rol) VALUES (3,1);
 CREATE TABLE ventas (
     venta_id SERIAL PRIMARY KEY,
     cliente_id INTEGER NOT NULL,
-    usuario_id INTEGER NOT NULL,
+    usuario_id INTEGER NOT NULL, -- Quién hizo la venta
     total DECIMAL(10,2) NOT NULL,
     fecha_venta DATE DEFAULT TODAY,
     estado VARCHAR(20) DEFAULT 'COMPLETADA',
@@ -82,6 +87,12 @@ CREATE TABLE ventas (
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (usuario_id) REFERENCES usuario_login2025(usu_id)
 );
+
+ALTER TABLE ventas ADD (tipo_transaccion VARCHAR(20) DEFAULT 'VENTA');
+ALTER TABLE ventas ADD (reparacion_id INTEGER);
+
+ALTER TABLE ventas ADD CONSTRAINT 
+(FOREIGN KEY (reparacion_id) REFERENCES reparaciones CONSTRAINT fk_ventas_reparacion);
 
 CREATE TABLE venta_detalle (
     detalle_id SERIAL PRIMARY KEY,
@@ -100,7 +111,7 @@ CREATE TABLE tipos_servicio (
     tipo_nombre VARCHAR(100) NOT NULL,
     tipo_descripcion VARCHAR(250),
     precio_base DECIMAL(10,2) DEFAULT 0.00,
-    tiempo_estimado INTEGER DEFAULT 1, 
+    tiempo_estimado INTEGER DEFAULT 1, -- días estimados
     situacion SMALLINT DEFAULT 1
 );
 
@@ -112,9 +123,9 @@ CREATE TABLE reparaciones (
     dispositivo_modelo VARCHAR(100) NOT NULL,
     dispositivo_serie VARCHAR(50),
     dispositivo_imei VARCHAR(20),
-    problema_reportado VARCHAR(500) NOT NULL,
-    diagnostico VARCHAR(500),
-    solucion_aplicada VARCHAR(500),
+    problema_reportado LVARCHAR(500) NOT NULL,
+    diagnostico LVARCHAR(500),
+    solucion_aplicada LVARCHAR(500),
     tipo_servicio_id INTEGER,
     tecnico_asignado INTEGER,
     estado VARCHAR(20) DEFAULT 'RECIBIDO',
@@ -125,7 +136,7 @@ CREATE TABLE reparaciones (
     presupuesto_inicial DECIMAL(10,2) DEFAULT 0.00,
     costo_final DECIMAL(10,2) DEFAULT 0.00,
     anticipo DECIMAL(10,2) DEFAULT 0.00,
-    observaciones VARCHAR(500),
+    observaciones LVARCHAR(500),
     situacion SMALLINT DEFAULT 1,
     FOREIGN KEY (cliente_id) REFERENCES clientes(id),
     FOREIGN KEY (tipo_servicio_id) REFERENCES tipos_servicio(tipo_id),
@@ -146,12 +157,12 @@ CREATE TABLE reparacion_historial (
 );
 
 -- Insertar tipos de servicio básicos
-INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES
-('Reparación de Pantalla', 'Cambio de pantalla LCD/OLED', 150.00, 1),
-('Cambio de Batería', 'Reemplazo de batería', 80.00, 1),
-('Reparación de Placa', 'Soldadura y reparación de componentes', 200.00, 3),
-('Liberación', 'Liberación de operador', 50.00, 1),
-('Actualización Software', 'Flash y actualización de firmware', 75.00, 1),
-('Reparación de Cámara', 'Cambio de cámara principal o frontal', 120.00, 2),
-('Reparación de Audio', 'Cambio de altavoz o micrófono', 90.00, 1),
-('Limpieza por Líquidos', 'Limpieza por daño con líquidos', 100.00, 2);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Reparación de Pantalla', 'Cambio de pantalla LCD/OLED', 150.00, 1);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Cambio de Batería', 'Reemplazo de batería', 80.00, 1);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Reparación de Placa', 'Soldadura y reparación de componentes', 200.00, 3);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Liberación', 'Liberación de operador', 50.00, 1);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Actualización Software', 'Flash y actualización de firmware', 75.00, 1);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Reparación de Cámara', 'Cambio de cámara principal o frontal', 120.00, 2);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Reparación de Audio', 'Cambio de altavoz o micrófono', 90.00, 1);
+INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES  ('Limpieza por Líquidos', 'Limpieza por daño con líquidos', 100.00, 2);-- Tabla de tipos de servicio/reparación
+
