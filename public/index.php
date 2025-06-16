@@ -9,6 +9,7 @@ use Controllers\MarcaController;
 use Controllers\InventarioController;
 use Controllers\VentasController;
 use Controllers\ReparacionesController;
+use Controllers\ReportesController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -65,6 +66,14 @@ $router->get('/reparaciones/eliminarAPI', [ReparacionesController::class, 'elimi
 $router->get('/reparaciones/buscarMarcasAPI', [ReparacionesController::class, 'buscarMarcasAPI']);
 $router->get('/reparaciones/buscarModelosPorMarcaAPI', [ReparacionesController::class, 'buscarModelosPorMarcaAPI']);
 
+// Rutas para Reportes y Dashboard
+$router->get('/reportes', [ReportesController::class, 'renderizarPagina']);
+$router->get('/reportes/metricas', [ReportesController::class, 'obtenerMetricasPrincipalesAPI']);
+$router->get('/reportes/ventas', [ReportesController::class, 'obtenerReporteVentasAPI']);
+$router->get('/reportes/inventario', [ReportesController::class, 'obtenerAnalisisInventarioAPI']);
+$router->get('/reportes/reparaciones', [ReportesController::class, 'obtenerReporteReparacionesAPI']);
+$router->get('/reportes/clientes', [ReportesController::class, 'obtenerAnalisisClientesAPI']);
+$router->get('/reportes/graficos', [ReportesController::class, 'obtenerDatosGraficosAPI']);
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();
