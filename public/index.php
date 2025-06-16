@@ -10,6 +10,8 @@ use Controllers\InventarioController;
 use Controllers\VentasController;
 use Controllers\ReparacionesController;
 use Controllers\ReportesController;
+use Controllers\UsuariosController;
+use Controllers\ConfiguracionController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -74,6 +76,17 @@ $router->get('/reportes/marcasMasVendidas', [ReportesController::class, 'marcasM
 $router->get('/reportes/inventarioPorEstado', [ReportesController::class, 'inventarioPorEstadoAPI']);
 $router->get('/reportes/estadisticasGenerales', [ReportesController::class, 'estadisticasGeneralesAPI']);
 
+// Rutas para Usuarios
+$router->get('/usuarios', [UsuariosController::class, 'renderizarPagina']);
+$router->post('/usuarios/guardarAPI', [UsuariosController::class, 'guardarAPI']);
+$router->get('/usuarios/buscarAPI', [UsuariosController::class, 'buscarAPI']);
+$router->post('/usuarios/modificarAPI', [UsuariosController::class, 'modificarAPI']);
+$router->get('/usuarios/eliminarAPI', [UsuariosController::class, 'eliminarAPI']);
+
+// Rutas para Configuración
+$router->get('/configuracion', [ConfiguracionController::class, 'renderizarPagina']);
+$router->get('/configuracion/obtenerConfiguracionAPI', [ConfiguracionController::class, 'obtenerConfiguracionAPI']);
+$router->post('/configuracion/crearRespaldoAPI', [ConfiguracionController::class, 'crearRespaldoAPI']);
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

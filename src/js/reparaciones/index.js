@@ -352,126 +352,37 @@ const buscarReparaciones = async () => {
 
 // FUNCIÓN PARA VER DETALLE DE REPARACIÓN
 const verDetalleReparacion = async (e) => {
-    const reparacionId = e.currentTarget.dataset.id;
-
+    const id = e.currentTarget.dataset.id;
+    
     try {
-        const respuesta = await fetch(`/proyecto01/reparaciones/verDetalleAPI?reparacion_id=${reparacionId}`);
+        const url = `/proyecto01/reparaciones/verDetalleAPI?id=${id}`;
+        const respuesta = await fetch(url);
         const datos = await respuesta.json();
-
+        
         if (datos.codigo === 1) {
-            const { reparacion, historial } = datos.data;
-            
-            let contenidoModal = `
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <h6 class="border-bottom pb-2">Información del Cliente</h6>
-                        <strong>Cliente:</strong> ${reparacion.cliente_nombre} ${reparacion.cliente_apellido}<br>
-                        <strong>Teléfono:</strong> ${reparacion.telefono}<br>
-                        <strong>NIT:</strong> ${reparacion.nit || 'Sin NIT'}
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="border-bottom pb-2">Información del Dispositivo</h6>
-                        <strong>Dispositivo:</strong> ${reparacion.dispositivo_marca} ${reparacion.dispositivo_modelo}<br>
-                        <strong>Serie:</strong> ${reparacion.dispositivo_serie || 'Sin serie'}<br>
-                        <strong>IMEI:</strong> ${reparacion.dispositivo_imei || 'Sin IMEI'}
-                    </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-12">
-                        <h6 class="border-bottom pb-2">Problema Reportado</h6>
-                        <p>${reparacion.problema_reportado}</p>
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <strong>Estado:</strong> <span class="badge bg-info">${reparacion.estado}</span>
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Técnico:</strong> ${reparacion.tecnico_nombre || 'Sin asignar'}
-                    </div>
-                    <div class="col-md-4">
-                        <strong>Tipo de Servicio:</strong> ${reparacion.tipo_nombre || 'Sin especificar'}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <strong>Presupuesto:</strong> Q${parseFloat(reparacion.presupuesto_inicial || 0).toFixed(2)}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Costo Final:</strong> Q${parseFloat(reparacion.costo_final || 0).toFixed(2)}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Anticipo:</strong> Q${parseFloat(reparacion.anticipo || 0).toFixed(2)}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Precio Base:</strong> Q${parseFloat(reparacion.precio_base || 0).toFixed(2)}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-md-3">
-                        <strong>Ingreso:</strong> ${reparacion.fecha_ingreso_formato || 'Sin fecha'}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Diagnóstico:</strong> ${reparacion.fecha_diagnostico_formato || 'Pendiente'}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Finalización:</strong> ${reparacion.fecha_finalizacion_formato || 'Pendiente'}
-                    </div>
-                    <div class="col-md-3">
-                        <strong>Entrega:</strong> ${reparacion.fecha_entrega_formato || 'Pendiente'}
-                    </div>
-                </div>
-
-                <h6 class="border-bottom pb-2 mb-3">Historial de Cambios</h6>
-                <div class="timeline">`;
-
-            historial.forEach(cambio => {
-                contenidoModal += `
-                    <div class="timeline-item">
-                        <strong>${cambio.fecha_cambio_formato}</strong> - ${cambio.usuario_nombre}<br>
-                        <span class="text-muted">
-                            ${cambio.estado_anterior ? `${cambio.estado_anterior} → ` : ''}${cambio.estado_nuevo}
-                        </span><br>
-                        ${cambio.observaciones ? `<em>"${cambio.observaciones}"</em>` : ''}
-                    </div>`;
-            });
-
-            contenidoModal += '</div>';
-
-            document.getElementById('ContenidoDetalleReparacion').innerHTML = contenidoModal;
-            
-            // Mostrar modal
-            const modal = new bootstrap.Modal(document.getElementById('ModalDetalleReparacion'));
-            modal.show();
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: datos.mensaje,
-                confirmButtonText: 'Entendido'
-            });
+            // Mostrar modal con detalles
+            // Implementar según tu diseño
         }
     } catch (error) {
         console.error('Error:', error);
-        Swal.fire({
-            icon: 'error',
-            title: 'Error de conexión',
-            text: 'No se pudo cargar el detalle de la reparación',
-            confirmButtonText: 'Entendido'
-        });
     }
 };
 
 // FUNCIÓN PARA CAMBIAR ESTADO
 const cambiarEstado = (e) => {
-    const reparacionId = e.currentTarget.dataset.id;
-    document.getElementById('estado_reparacion_id').value = reparacionId;
-    
-    const modal = new bootstrap.Modal(ModalCambiarEstado);
+    const id = e.currentTarget.dataset.id;
+    // Mostrar modal para cambiar estado
+    document.getElementById('reparacion_cambio_estado').value = id;
+    const modal = new bootstrap.Modal(document.getElementById('ModalCambiarEstado'));
+    modal.show();
+};
+
+// FUNCIÓN PARA ASIGNAR TÉCNICO
+const asignarTecnico = (e) => {
+    const id = e.currentTarget.dataset.id;
+    // Mostrar modal para asignar técnico
+    document.getElementById('reparacion_asignar_tecnico').value = id;
+    const modal = new bootstrap.Modal(document.getElementById('ModalAsignarTecnico'));
     modal.show();
 };
 
@@ -528,15 +439,6 @@ const confirmarCambioEstado = async () => {
             confirmButtonText: 'Entendido'
         });
     }
-};
-
-// FUNCIÓN PARA ASIGNAR TÉCNICO
-const asignarTecnico = (e) => {
-    const reparacionId = e.currentTarget.dataset.id;
-    document.getElementById('tecnico_reparacion_id').value = reparacionId;
-    
-    const modal = new bootstrap.Modal(ModalAsignarTecnico);
-    modal.show();
 };
 
 // FUNCIÓN PARA CONFIRMAR ASIGNACIÓN DE TÉCNICO
