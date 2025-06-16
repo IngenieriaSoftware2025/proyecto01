@@ -368,25 +368,17 @@ class ReparacionesController extends ActiveRecord
                 case 'ENTREGADO':
                     $updateFields .= ", fecha_entrega = '$fechaActual'";
 
-                    // Obtener datos de la reparación para registrar el cobro
+                    // NUEVA FUNCIONALIDAD: Registrar cobro automáticamente
                     $queryReparacionDatos = "SELECT cliente_id, costo_final, dispositivo_marca, dispositivo_modelo 
-                            FROM reparaciones 
-                            WHERE reparacion_id = $reparacionId";
+                            FROM reparaciones WHERE reparacion_id = $reparacionId";
                     $reparacionDatos = self::fetchFirst($queryReparacionDatos);
 
-                    // Si hay costo final, registrar en historial de ventas
                     if ($reparacionDatos && $reparacionDatos['costo_final'] > 0) {
                         $clienteId = $reparacionDatos['cliente_id'];
                         $costoFinal = $reparacionDatos['costo_final'];
                         $descripcionDispositivo = $reparacionDatos['dispositivo_marca'] . ' ' . $reparacionDatos['dispositivo_modelo'];
 
-                        $ventaId = self::registrarCobroReparacion(
-                            $reparacionId,
-                            $clienteId,
-                            $usuarioId,
-                            $costoFinal,
-                            $descripcionDispositivo
-                        );
+                        $ventaId = self::registrarCobroReparacion($reparacionId, $clienteId, $usuarioId, $costoFinal, $descripcionDispositivo);
 
                         if ($ventaId) {
                             $observaciones .= " - Registrado en ventas ID: $ventaId";
@@ -620,34 +612,16 @@ class ReparacionesController extends ActiveRecord
     {
         try {
             $queryVenta = "INSERT INTO ventas (
-            cliente_id, 
-            usuario_id, 
-            total, 
-            fecha_venta, 
-            estado, 
-            observaciones, 
-            tipo_transaccion, 
-            reparacion_id, 
-            situacion
+            cliente_id, usuario_id, total, fecha_venta, estado, 
+            observaciones, tipo_transaccion, reparacion_id, situacion
         ) VALUES (
-            $clienteId, 
-            $usuarioId, 
-            $costoFinal, 
-            TODAY, 
-            'COMPLETADA', 
+            $clienteId, $usuarioId, $costoFinal, TODAY, 'COMPLETADA', 
             'Cobro por servicio de reparación - $observaciones', 
-            'REPARACION', 
-            $reparacionId, 
-            1
+            'REPARACION', $reparacionId, 1
         )";
 
             $resultado = self::SQL($queryVenta);
-
-            if ($resultado) {
-                return self::$db->lastInsertId('ventas');
-            }
-
-            return false;
+            return $resultado ? self::$db->lastInsertId('ventas') : false;
         } catch (Exception $e) {
             error_log("Error al registrar cobro de reparación: " . $e->getMessage());
             return false;
@@ -661,10 +635,7 @@ class ReparacionesController extends ActiveRecord
 
         if (empty($_POST['reparacion_id']) || empty($_POST['costo_final'])) {
             http_response_code(400);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'ID de reparación y costo final son requeridos'
-            ]);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'ID de reparación y costo final son requeridos']);
             return;
         }
 
@@ -675,42 +646,27 @@ class ReparacionesController extends ActiveRecord
 
             if ($costoFinal <= 0) {
                 http_response_code(400);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'El costo final debe ser mayor a 0'
-                ]);
+                echo json_encode(['codigo' => 0, 'mensaje' => 'El costo final debe ser mayor a 0']);
                 return;
             }
 
-            // Actualizar costo final
             $queryUpdate = "UPDATE reparaciones SET costo_final = $costoFinal WHERE reparacion_id = $reparacionId";
             $resultado = self::SQL($queryUpdate);
 
             if ($resultado) {
-                // Registrar en historial
                 $queryHistorial = "INSERT INTO reparacion_historial (reparacion_id, estado_anterior, estado_nuevo, usuario_cambio, observaciones)
                               VALUES ($reparacionId, 'COSTO_ACTUALIZADO', 'COSTO_ACTUALIZADO', $usuarioId, 'Costo final actualizado: Q$costoFinal')";
                 self::SQL($queryHistorial);
 
                 http_response_code(200);
-                echo json_encode([
-                    'codigo' => 1,
-                    'mensaje' => 'Costo final actualizado exitosamente'
-                ]);
+                echo json_encode(['codigo' => 1, 'mensaje' => 'Costo final actualizado exitosamente']);
             } else {
                 http_response_code(500);
-                echo json_encode([
-                    'codigo' => 0,
-                    'mensaje' => 'Error al actualizar costo final'
-                ]);
+                echo json_encode(['codigo' => 0, 'mensaje' => 'Error al actualizar costo final']);
             }
         } catch (Exception $e) {
             http_response_code(500);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'Error al actualizar costo final',
-                'detalle' => $e->getMessage()
-            ]);
+            echo json_encode(['codigo' => 0, 'mensaje' => 'Error al actualizar costo final', 'detalle' => $e->getMessage()]);
         }
     }
 }
