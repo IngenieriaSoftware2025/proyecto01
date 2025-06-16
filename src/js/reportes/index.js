@@ -1,19 +1,13 @@
-import { Dropdown } from "bootstrap";
-import Swal from "sweetalert2";
-import { validarFormulario } from "../funciones";
-import DataTable from "datatables.net-bs5";
-import { lenguaje } from "../lenguaje";
 import Chart from "chart.js/auto";
+import Swal from "sweetalert2";
 
-// Variables globales para las gráficas
-let graficoVentas = null;
-let graficoReparaciones = null;
+let graficoVentasMes = null;
+let graficoEstadoReparaciones = null;
 let graficoMarcasVendidas = null;
+let graficoInventarioEstado = null;
 
-// Elementos del DOM
+
 const BtnActualizarDashboard = document.getElementById('BtnActualizarDashboard');
-
-// Función para mostrar mensajes de error
 const mostrarError = (mensaje) => {
     console.error('Error:', mensaje);
     Swal.fire({
@@ -24,7 +18,6 @@ const mostrarError = (mensaje) => {
     });
 };
 
-// Función para validar datos antes de procesarlos
 const validarDatos = (datos, nombreFuncion = '') => {
     if (!datos) {
         console.warn(`${nombreFuncion}: datos es null o undefined`);
@@ -37,162 +30,152 @@ const validarDatos = (datos, nombreFuncion = '') => {
     return true;
 };
 
-// Función para actualizar métricas principales
-const cargarMetricasPrincipales = async () => {
-    try {
-        const respuesta = await fetch('/proyecto01/reportes/metricas');
-        const datos = await respuesta.json();
-        
-        console.log('Métricas recibidas:', datos);
-        
-        if (datos.codigo === 1) {
-            const { data } = datos;
-            
-            // Actualizar tarjetas de métricas con validación
-            const elementoVentasHoy = document.getElementById('total-ventas-hoy');
-            const elementoIngresosHoy = document.getElementById('ingresos-hoy');
-            const elementoClientes = document.getElementById('total-clientes');
-            const elementoDispositivos = document.getElementById('total-dispositivos');
-            const elementoStockTotal = document.getElementById('stock-total');
-            const elementoReparaciones = document.getElementById('reparaciones-pendientes');
-            const elementoValorInventario = document.getElementById('valor-inventario');
-            
-            if (elementoVentasHoy) elementoVentasHoy.textContent = (data?.ventas_hoy?.total_ventas_hoy || '0');
-            if (elementoIngresosHoy) elementoIngresosHoy.textContent = `Q${parseFloat(data?.ventas_hoy?.ingresos_hoy || 0).toFixed(2)}`;
-            if (elementoClientes) elementoClientes.textContent = (data?.clientes?.total_clientes_activos || '0');
-            if (elementoDispositivos) elementoDispositivos.textContent = (data?.inventario?.total_dispositivos || '0');
-            if (elementoStockTotal) elementoStockTotal.textContent = `Stock: ${data?.inventario?.stock_total || '0'}`;
-            if (elementoReparaciones) elementoReparaciones.textContent = (data?.reparaciones?.reparaciones_pendientes || '0');
-            if (elementoValorInventario) elementoValorInventario.textContent = `Q${parseFloat(data?.valor_inventario?.valor_inventario || 0).toFixed(2)}`;
-            
-        } else {
-            mostrarError('Error al cargar métricas principales: ' + (datos.mensaje || 'Error desconocido'));
-        }
-    } catch (error) {
-        console.error('Error al cargar métricas:', error);
-        mostrarError('Error de conexión al cargar métricas');
+const actualizarTimestamp = () => {
+    const elemento = document.getElementById('ultimaActualizacion');
+    if (elemento) {
+        elemento.textContent = new Date().toLocaleString('es-GT');
     }
 };
 
-// Función para cargar datos de ventas y crear gráfico
-const cargarGraficoVentas = async (tipo = 'ventas_diarias') => {
+const cargarGraficoVentasMes = async () => {
     try {
-        const respuesta = await fetch(`/proyecto01/reportes/graficos?tipo=${tipo}`);
+        const respuesta = await fetch('/proyecto01/reportes/ventasPorMes');
         const datos = await respuesta.json();
         
-        console.log('Datos gráfico ventas:', datos);
+        console.log('Datos ventas por mes:', datos);
         
-        if (datos.codigo === 1 && validarDatos(datos.data, 'cargarGraficoVentas')) {
-            const ctx = document.getElementById('graficoVentas');
+        if (datos.codigo === 1 && validarDatos(datos.data, 'cargarGraficoVentasMes')) {
+            const ctx = document.getElementById('graficoVentasMes');
             if (!ctx) {
-                console.error('Elemento graficoVentas no encontrado');
+                console.error('Elemento graficoVentasMes no encontrado');
                 return;
             }
             
-            if (graficoVentas) {
-                graficoVentas.destroy();
+            if (graficoVentasMes) {
+                graficoVentasMes.destroy();
             }
             
-            // Preparar datos con validación
-            const labels = datos.data.map(item => {
-                if (item.label) {
-                    const fecha = new Date(item.label);
-                    return isNaN(fecha.getTime()) ? item.label : fecha.toLocaleDateString('es-GT');
-                }
-                return 'Sin fecha';
-            });
+            const labels = datos.data.map(item => item.label);
+            const ventas = datos.data.map(item => item.ventas);
+            const montos = datos.data.map(item => parseFloat(item.monto || 0));
             
-            const values = datos.data.map(item => parseFloat(item.value || 0));
-            
-            graficoVentas = new Chart(ctx, {
-                type: 'line',
+            graficoVentasMes = new Chart(ctx, {
+                type: 'bar',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Ingresos (Q)',
-                        data: values,
-                        backgroundColor: 'rgba(13, 110, 253, 0.2)',
-                        borderColor: 'rgba(13, 110, 253, 1)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.4
-                    }]
+                    datasets: [
+                        {
+                            label: 'Cantidad de Ventas',
+                            data: ventas,
+                            backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Ingresos (Q)',
+                            data: montos,
+                            backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 2,
+                            yAxisID: 'y1',
+                            type: 'line'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Ingresos (Q)'
-                            }
-                        },
                         x: {
                             title: {
                                 display: true,
-                                text: 'Fecha'
+                                text: 'Meses'
                             }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Cantidad de Ventas'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Ingresos (Q)'
+                            },
+                            grid: {
+                                drawOnChartArea: false,
+                            },
                         }
                     },
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Tendencia de Ventas'
+                            text: 'Ventas y Ingresos Mensuales'
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
                         }
                     }
                 }
             });
         } else {
-            console.warn('No hay datos válidos para el gráfico de ventas');
+            console.warn('No hay datos válidos para el gráfico de ventas por mes');
         }
     } catch (error) {
-        console.error('Error al cargar gráfico de ventas:', error);
+        console.error('Error al cargar gráfico de ventas por mes:', error);
     }
 };
 
-// Función para cargar gráfico de reparaciones por estado
-const cargarGraficoReparaciones = async () => {
+const cargarGraficoEstadoReparaciones = async () => {
     try {
-        const respuesta = await fetch('/proyecto01/reportes/graficos?tipo=reparaciones_estado');
+        const respuesta = await fetch('/proyecto01/reportes/estadoReparaciones');
         const datos = await respuesta.json();
         
-        console.log('Datos gráfico reparaciones:', datos);
+        console.log('Datos estado reparaciones:', datos);
         
-        if (datos.codigo === 1 && validarDatos(datos.data, 'cargarGraficoReparaciones')) {
-            const ctx = document.getElementById('graficoReparaciones');
+        if (datos.codigo === 1 && validarDatos(datos.data, 'cargarGraficoEstadoReparaciones')) {
+            const ctx = document.getElementById('graficoEstadoReparaciones');
             if (!ctx) {
-                console.error('Elemento graficoReparaciones no encontrado');
+                console.error('Elemento graficoEstadoReparaciones no encontrado');
                 return;
             }
             
-            if (graficoReparaciones) {
-                graficoReparaciones.destroy();
+            if (graficoEstadoReparaciones) {
+                graficoEstadoReparaciones.destroy();
             }
             
-            // Colores para diferentes estados
-            const colores = {
-                'RECIBIDO': '#6c757d',
-                'EN_DIAGNOSTICO': '#17a2b8',
-                'DIAGNOSTICADO': '#ffc107',
-                'EN_REPARACION': '#007bff',
-                'REPARADO': '#28a745',
-                'ENTREGADO': '#343a40',
-                'CANCELADO': '#dc3545'
-            };
+            const labels = datos.data.map(item => item.label);
+            const values = datos.data.map(item => item.value);
+            const colores = [
+                '#6c757d', 
+                '#17a2b8', 
+                '#ffc107', 
+                '#007bff', 
+                '#28a745', 
+                '#343a40', 
+                '#dc3545'  
+            ];
             
-            const labels = datos.data.map(item => item.label || 'Sin estado');
-            const values = datos.data.map(item => parseInt(item.value || 0));
-            const backgroundColors = labels.map(label => colores[label] || '#6c757d');
-            
-            graficoReparaciones = new Chart(ctx, {
+            graficoEstadoReparaciones = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: values,
-                        backgroundColor: backgroundColors,
+                        backgroundColor: colores.slice(0, labels.length),
                         borderWidth: 2,
                         borderColor: '#fff'
                     }]
@@ -203,29 +186,32 @@ const cargarGraficoReparaciones = async () => {
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Reparaciones por Estado'
+                            text: 'Distribución de Estados'
                         },
                         legend: {
-                            position: 'bottom'
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
                         }
                     }
                 }
             });
         } else {
-            console.warn('No hay datos válidos para el gráfico de reparaciones');
+            console.warn('No hay datos válidos para el gráfico de estado de reparaciones');
         }
     } catch (error) {
-        console.error('Error al cargar gráfico de reparaciones:', error);
+        console.error('Error al cargar gráfico de estado de reparaciones:', error);
     }
 };
 
-// Función para cargar gráfico de marcas más vendidas
 const cargarGraficoMarcasVendidas = async () => {
     try {
-        const respuesta = await fetch('/proyecto01/reportes/graficos?tipo=marcas_vendidas');
+        const respuesta = await fetch('/proyecto01/reportes/marcasMasVendidas');
         const datos = await respuesta.json();
         
-        console.log('Datos gráfico marcas:', datos);
+        console.log('Datos marcas más vendidas:', datos);
         
         if (datos.codigo === 1 && validarDatos(datos.data, 'cargarGraficoMarcasVendidas')) {
             const ctx = document.getElementById('graficoMarcasVendidas');
@@ -238,16 +224,16 @@ const cargarGraficoMarcasVendidas = async () => {
                 graficoMarcasVendidas.destroy();
             }
             
-            // Tomar solo las primeras 10 marcas con validación
-            const topMarcas = datos.data.slice(0, 10);
-            const labels = topMarcas.map(item => item.label || 'Sin marca');
-            const values = topMarcas.map(item => parseInt(item.value || 0));
-            
-            // Generar colores dinámicos
+            const labels = datos.data.map(item => item.label);
+            const values = datos.data.map(item => item.value);
             const backgroundColors = labels.map((_, index) => {
-                const hue = (index * 360) / labels.length;
+                const hue = (index * 72) % 360; 
                 return `hsla(${hue}, 70%, 60%, 0.8)`;
             });
+            
+            const borderColors = backgroundColors.map(color => 
+                color.replace('0.8', '1')
+            );
             
             graficoMarcasVendidas = new Chart(ctx, {
                 type: 'bar',
@@ -257,22 +243,23 @@ const cargarGraficoMarcasVendidas = async () => {
                         label: 'Unidades Vendidas',
                         data: values,
                         backgroundColor: backgroundColors,
-                        borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
+                        borderColor: borderColors,
                         borderWidth: 1
                     }]
                 },
                 options: {
+                    indexAxis: 'y', 
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
+                        x: {
                             beginAtZero: true,
                             title: {
                                 display: true,
                                 text: 'Unidades Vendidas'
                             }
                         },
-                        x: {
+                        y: {
                             title: {
                                 display: true,
                                 text: 'Marcas'
@@ -282,202 +269,187 @@ const cargarGraficoMarcasVendidas = async () => {
                     plugins: {
                         title: {
                             display: true,
-                            text: 'Top 10 Marcas Más Vendidas'
+                            text: 'Top 5 Marcas por Ventas'
+                        },
+                        legend: {
+                            display: false
                         }
                     }
                 }
             });
         } else {
-            console.warn('No hay datos válidos para el gráfico de marcas');
+            console.warn('No hay datos válidos para el gráfico de marcas más vendidas');
         }
     } catch (error) {
-        console.error('Error al cargar gráfico de marcas:', error);
+        console.error('Error al cargar gráfico de marcas más vendidas:', error);
     }
 };
 
-// Función para cargar ranking de vendedores
-const cargarRankingVendedores = async () => {
+const cargarGraficoInventarioEstado = async () => {
     try {
-        const respuesta = await fetch('/proyecto01/reportes/ventas?periodo=30');
+        const respuesta = await fetch('/proyecto01/reportes/inventarioPorEstado');
         const datos = await respuesta.json();
         
-        console.log('Datos ranking vendedores:', datos);
+        console.log('Datos inventario por estado:', datos);
         
-        const contenedor = document.getElementById('ranking-vendedores');
-        if (!contenedor) {
-            console.error('Elemento ranking-vendedores no encontrado');
-            return;
-        }
-        
-        if (datos.codigo === 1 && datos.data && validarDatos(datos.data.ranking_vendedores, 'cargarRankingVendedores')) {
-            if (datos.data.ranking_vendedores.length === 0) {
-                contenedor.innerHTML = '<div class="text-center text-muted p-4">No hay datos de vendedores disponibles</div>';
+        if (datos.codigo === 1 && validarDatos(datos.data, 'cargarGraficoInventarioEstado')) {
+            const ctx = document.getElementById('graficoInventarioEstado');
+            if (!ctx) {
+                console.error('Elemento graficoInventarioEstado no encontrado');
                 return;
             }
             
-            let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Vendedor</th><th>Ventas</th><th>Ingresos</th></tr></thead><tbody>';
+            if (graficoInventarioEstado) {
+                graficoInventarioEstado.destroy();
+            }
             
-            datos.data.ranking_vendedores.forEach((vendedor, index) => {
-                const badgeClass = index === 0 ? 'bg-warning' : index === 1 ? 'bg-secondary' : index === 2 ? 'bg-dark' : 'bg-light text-dark';
-                html += `
-                    <tr>
-                        <td>
-                            <span class="badge ${badgeClass} me-2">${index + 1}</span>
-                            ${vendedor.vendedor || 'Sin nombre'}
-                        </td>
-                        <td>${vendedor.total_ventas || 0}</td>
-                        <td class="text-success fw-bold">Q${parseFloat(vendedor.total_ingresos || 0).toFixed(2)}</td>
-                    </tr>
-                `;
+            const labels = datos.data.map(item => item.label);
+            const values = datos.data.map(item => item.value);
+            const colores = [
+                '#28a745', 
+                '#ffc107',
+                '#dc3545', 
+                '#6c757d',
+                '#17a2b8'  
+            ];
+            
+            graficoInventarioEstado = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colores.slice(0, labels.length),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución por Estado'
+                        },
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
             });
-            
-            html += '</tbody></table></div>';
-            contenedor.innerHTML = html;
         } else {
-            contenedor.innerHTML = '<div class="text-center text-muted p-4">No hay datos de vendedores disponibles</div>';
+            console.warn('No hay datos válidos para el gráfico de inventario por estado');
         }
     } catch (error) {
-        console.error('Error al cargar ranking de vendedores:', error);
-        const contenedor = document.getElementById('ranking-vendedores');
-        if (contenedor) {
-            contenedor.innerHTML = '<div class="text-center text-danger p-4">Error al cargar datos</div>';
-        }
+        console.error('Error al cargar gráfico de inventario por estado:', error);
     }
 };
 
-// Función para cargar análisis de inventario
-const cargarAnalisisInventario = async () => {
+
+const cargarMetricasPrincipales = async () => {
     try {
-        const respuesta = await fetch('/proyecto01/reportes/inventario');
+        const respuesta = await fetch('/proyecto01/reportes/estadisticasGenerales');
         const datos = await respuesta.json();
         
-        console.log('Datos análisis inventario:', datos);
+        console.log('Métricas recibidas:', datos);
         
         if (datos.codigo === 1 && datos.data) {
-            // Cargar stock bajo
-            const stockBajoContainer = document.getElementById('stock-bajo');
-            if (stockBajoContainer) {
-                if (validarDatos(datos.data.stock_bajo, 'stock_bajo') && datos.data.stock_bajo.length > 0) {
-                    let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Dispositivo</th><th>Serie</th><th>Stock</th><th>Precio</th></tr></thead><tbody>';
-                    
-                    datos.data.stock_bajo.forEach(item => {
-                        const alertClass = (item.stock_disponible || 0) <= 2 ? 'table-danger' : 'table-warning';
-                        html += `
-                            <tr class="${alertClass}">
-                                <td><strong>${item.marca_nombre || 'Sin marca'}</strong><br><small>${item.marca_modelo || 'Sin modelo'}</small></td>
-                                <td><code class="small">${item.numero_serie || 'Sin serie'}</code></td>
-                                <td><span class="badge bg-danger">${item.stock_disponible || 0}</span></td>
-                                <td>Q${parseFloat(item.precio_venta || 0).toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += '</tbody></table></div>';
-                    stockBajoContainer.innerHTML = html;
-                } else {
-                    stockBajoContainer.innerHTML = '<div class="text-center text-success p-4"><i class="bi bi-check-circle fs-1"></i><br>No hay productos con stock bajo</div>';
-                }
-            }
+            const { data } = datos;
+            const elementos = {
+                'total-ventas-hoy': data.ventas_hoy || 0,
+                'ingresos-hoy': `Q${parseFloat(data.monto_ventas_hoy || 0).toFixed(2)}`,
+                'total-clientes': data.total_clientes || 0,
+                'reparaciones-pendientes': data.reparaciones_pendientes || 0,
+                'total-dispositivos': data.total_dispositivos || 0,
+                'stock-total': data.stock_total || 0,
+                'valor-inventario': `Q${parseFloat(data.valor_inventario || 0).toFixed(2)}`
+            };
             
-            // Cargar valor por marca
-            const valorMarcaContainer = document.getElementById('valor-por-marca');
-            if (valorMarcaContainer) {
-                if (validarDatos(datos.data.valor_por_marca, 'valor_por_marca') && datos.data.valor_por_marca.length > 0) {
-                    let html = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Marca</th><th>Dispositivos</th><th>Stock</th><th>Valor Total</th></tr></thead><tbody>';
-                    
-                    datos.data.valor_por_marca.forEach(item => {
-                        html += `
-                            <tr>
-                                <td><strong>${item.marca || 'Sin marca'}</strong></td>
-                                <td>${item.cantidad_dispositivos || 0}</td>
-                                <td>${item.stock_total || 0}</td>
-                                <td class="text-success fw-bold">Q${parseFloat(item.valor_total || 0).toFixed(2)}</td>
-                            </tr>
-                        `;
-                    });
-                    
-                    html += '</tbody></table></div>';
-                    valorMarcaContainer.innerHTML = html;
-                } else {
-                    valorMarcaContainer.innerHTML = '<div class="text-center text-muted p-4">No hay datos de valor por marca</div>';
+            Object.entries(elementos).forEach(([id, valor]) => {
+                const elemento = document.getElementById(id);
+                if (elemento) {
+                    elemento.textContent = valor;
                 }
-            }
+            });
+        } else {
+            mostrarError('Error al cargar métricas principales: ' + (datos.mensaje || 'Error desconocido'));
         }
     } catch (error) {
-        console.error('Error al cargar análisis de inventario:', error);
+        console.error('Error al cargar métricas:', error);
+        mostrarError('Error de conexión al cargar métricas');
     }
 };
 
-// Función principal para cargar todo el dashboard
 const cargarDashboard = async () => {
     console.log('Iniciando carga del dashboard...');
-    
-    // Mostrar indicadores de carga
-    document.querySelectorAll('.loading-placeholder').forEach(element => {
-        element.innerHTML = '<div class="text-center p-4"><div class="spinner-border" role="status"></div></div>';
+    Swal.fire({
+        title: 'Cargando Dashboard',
+        text: 'Obteniendo datos actualizados...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
     });
     
     try {
-        // Cargar métricas principales primero
         await cargarMetricasPrincipales();
-        
-        // Luego cargar gráficos
-        await cargarGraficoVentas();
-        await cargarGraficoReparaciones();
-        await cargarGraficoMarcasVendidas();
-        
-        // Finalmente cargar datos de tablas
-        await cargarRankingVendedores();
-        await cargarAnalisisInventario();
+        await Promise.all([
+            cargarGraficoVentasMes(),
+            cargarGraficoEstadoReparaciones(),
+            cargarGraficoMarcasVendidas(),
+            cargarGraficoInventarioEstado()
+        ]);
+
+        actualizarTimestamp();
         
         console.log('Dashboard cargado exitosamente');
         
         Swal.fire({
             icon: 'success',
-            title: 'Dashboard actualizado',
-            text: 'Los datos disponibles se han cargado correctamente',
-            timer: 1500,
+            title: 'Dashboard Actualizado',
+            text: 'Todos los datos se han cargado correctamente',
+            timer: 2000,
             showConfirmButton: false
         });
         
     } catch (error) {
         console.error('Error al cargar dashboard:', error);
-        mostrarError('Error al actualizar el dashboard');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al Cargar Dashboard',
+            text: 'Ocurrió un error al actualizar los datos',
+            confirmButtonText: 'Reintentar'
+        });
     }
 };
 
-// Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM cargado, iniciando dashboard...');
     
-    // Cargar dashboard inicial
     setTimeout(() => {
         cargarDashboard();
     }, 500);
     
-    // Botón actualizar dashboard
     if (BtnActualizarDashboard) {
-        BtnActualizarDashboard.addEventListener('click', cargarDashboard);
-    }
-    
-    // Filtros de período
-    document.querySelectorAll('.periodo-filter').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        BtnActualizarDashboard.addEventListener('click', (e) => {
             e.preventDefault();
             cargarDashboard();
         });
-    });
+    }
     
-    // Botones de tipo de gráfico de ventas
-    document.querySelectorAll('.grafico-periodo').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            document.querySelectorAll('.grafico-periodo').forEach(b => b.classList.remove('active'));
-            e.target.classList.add('active');
-            
-            const tipo = e.target.dataset.tipo;
-            cargarGraficoVentas(tipo);
-        });
-    });
+    setInterval(() => {
+        console.log('Auto-actualizando dashboard...');
+        cargarDashboard();
+    }, 300000); // 5 minutos
 });
 
-console.log('Módulo de reportes y dashboard inicializado correctamente');
+window.addEventListener('error', (event) => {
+    console.error('Error global capturado:', event.error);
+});
+
+console.log('Módulo de dashboard con 4 gráficas inicializado correctamente');

@@ -1,5 +1,4 @@
 <?php
-// Verificar autenticación y obtener rol
 session_start();
 if (!isset($_SESSION['login'])) {
     header('Location: /proyecto01/');
@@ -8,209 +7,123 @@ if (!isset($_SESSION['login'])) {
 $esAdmin = $_SESSION['rol'] === 'ADMIN';
 ?>
 
-<meta name="user-role" content="<?= $_SESSION['rol'] ?>">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Reportes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
 
-<!-- Dashboard Principal -->
-<div class="row p-3">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="text-primary mb-0">
-                <i class="bi bi-graph-up me-2"></i>Dashboard de Reportes
-            </h2>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-primary btn-sm" id="BtnActualizarDashboard">
-                    <i class="bi bi-arrow-clockwise me-1"></i>Actualizar
-                </button>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-calendar me-1"></i>Período
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item periodo-filter" href="#" data-periodo="7">Últimos 7 días</a></li>
-                        <li><a class="dropdown-item periodo-filter" href="#" data-periodo="30">Últimos 30 días</a></li>
-                        <li><a class="dropdown-item periodo-filter" href="#" data-periodo="90">Últimos 90 días</a></li>
-                    </ul>
+<div class="container-fluid">
+    <div class="row justify-content-center p-3">
+        <div class="col-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>
+                        Dashboard de Reportes - Sistema de Gestión de Celulares
+                    </h2>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Métricas Principales -->
-<div class="row p-3" id="metricas-principales">
-    <div class="col-12">
-        <h5 class="text-secondary mb-3">Métricas Principales</h5>
-    </div>
-    
-    <!-- Tarjetas de Métricas -->
-    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="text-muted small">Ventas Hoy</div>
-                    <i class="bi bi-cart3 text-primary fs-4"></i>
-                </div>
-                <h4 class="mb-1" id="total-ventas-hoy">-</h4>
-                <small class="text-success" id="ingresos-hoy">Q0.00</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="text-muted small">Clientes</div>
-                    <i class="bi bi-people text-success fs-4"></i>
-                </div>
-                <h4 class="mb-1" id="total-clientes">-</h4>
-                <small class="text-muted">Activos</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="text-muted small">Inventario</div>
-                    <i class="bi bi-boxes text-warning fs-4"></i>
-                </div>
-                <h4 class="mb-1" id="total-dispositivos">-</h4>
-                <small class="text-muted" id="stock-total">Stock: -</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="text-muted small">Reparaciones</div>
-                    <i class="bi bi-tools text-info fs-4"></i>
-                </div>
-                <h4 class="mb-1" id="reparaciones-pendientes">-</h4>
-                <small class="text-muted">Pendientes</small>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4 col-md-8 col-sm-12 mb-3">
-        <div class="card border-0 shadow-sm h-100">
-            <div class="card-body text-center">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="text-muted small">Valor Inventario</div>
-                    <i class="bi bi-currency-dollar text-dark fs-4"></i>
-                </div>
-                <h4 class="mb-1 text-success" id="valor-inventario">Q0.00</h4>
-                <small class="text-muted">Total en stock</small>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Gráficos Principales -->
-<div class="row p-3">
-    <!-- Gráfico de Ventas -->
-    <div class="col-lg-8 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-transparent border-0">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Tendencia de Ventas</h6>
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button class="btn btn-outline-primary active grafico-periodo" data-tipo="ventas_diarias">Diario</button>
-                        <button class="btn btn-outline-primary grafico-periodo" data-tipo="ventas_mensuales">Mensual</button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <canvas id="graficoVentas" height="400"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Gráfico de Reparaciones por Estado -->
-    <div class="col-lg-4 mb-4">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-transparent border-0">
-                <h6 class="mb-0">Reparaciones por Estado</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="graficoReparaciones" height="400"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Sección de Reportes Detallados -->
-<div class="row p-3">
-    <div class="col-12">
-        <div class="card border-0 shadow-sm">
-            <div class="card-header bg-transparent border-0">
-                <ul class="nav nav-tabs card-header-tabs" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-ventas">
-                            <i class="bi bi-cart3 me-1"></i>Ventas
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-inventario">
-                            <i class="bi bi-boxes me-1"></i>Inventario
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-reparaciones-detalle">
-                            <i class="bi bi-tools me-1"></i>Reparaciones
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-clientes">
-                            <i class="bi bi-people me-1"></i>Clientes
-                        </button>
-                    </li>
-                </ul>
-            </div>
-            <div class="card-body">
-                <div class="tab-content">
-                    <!-- Tab Ventas -->
-                    <div class="tab-pane fade show active" id="tab-ventas">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Ranking de Vendedores</h6>
-                                <div id="ranking-vendedores" class="loading-placeholder">
-                                    <div class="text-center p-4">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Cargando...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Marcas Más Vendidas</h6>
-                                <canvas id="graficoMarcasVendidas" height="300"></canvas>
-                            </div>
+                <div class="card-body p-4">
+     
+                    <div class="row mb-4">
+                        <div class="col-12 text-center">
+                            <button type="button" class="btn btn-success btn-lg" id="BtnActualizarDashboard">
+                                <i class="bi bi-arrow-clockwise me-2"></i>
+                                Actualizar Dashboard
+                            </button>
+                            <small class="d-block text-muted mt-2">
+                                Última actualización: <span id="ultimaActualizacion">--</span>
+                            </small>
                         </div>
                     </div>
 
-                    <!-- Tab Inventario -->
-                    <div class="tab-pane fade" id="tab-inventario">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Stock Bajo (≤5 unidades)</h6>
-                                <div id="stock-bajo" class="loading-placeholder">
-                                    <div class="text-center p-4">
-                                        <div class="spinner-border text-warning" role="status">
-                                            <span class="visually-hidden">Cargando...</span>
+                    <div class="row mb-5">
+                        <div class="col-12">
+                            <h4 class="text-center mb-4 text-primary">
+                                <i class="bi bi-speedometer2 me-2"></i>
+                                Métricas Principales
+                            </h4>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-left-primary shadow h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                Ventas Hoy
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-ventas-hoy">
+                                                0
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="bi bi-cart-check fs-2 text-primary"></i>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Valor por Marca</h6>
-                                <div id="valor-por-marca" class="loading-placeholder">
-                                    <div class="text-center p-4">
-                                        <div class="spinner-border text-success" role="status">
-                                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-left-success shadow h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                Ingresos Hoy
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="ingresos-hoy">
+                                                Q0.00
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <span class="fs-2 text-success fw-bold">Q</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-left-info shadow h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                Clientes Activos
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="total-clientes">
+                                                0
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="bi bi-people fs-2 text-info"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <div class="card border-left-warning shadow h-100">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                                Reparaciones Pendientes
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="reparaciones-pendientes">
+                                                0
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="bi bi-tools fs-2 text-warning"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -218,25 +131,125 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
                         </div>
                     </div>
 
-                    <!-- Tab Reparaciones Detalle -->
-                    <div class="tab-pane fade" id="tab-reparaciones-detalle">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Rendimiento por Técnico</h6>
-                                <div id="rendimiento-tecnicos" class="loading-placeholder">
-                                    <div class="text-center p-4">
-                                        <div class="spinner-border text-info" role="status">
-                                            <span class="visually-hidden">Cargando...</span>
+                    <div class="row">
+                        <div class="col-12">
+                            <h4 class="text-center mb-4 text-primary">
+                                <i class="bi bi-bar-chart me-2"></i>
+                                Análisis Visual
+                            </h4>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-bar-chart-line me-2"></i>
+                                        Ventas por Mes
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px;">
+                                        <canvas id="graficoVentasMes"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-info text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-pie-chart me-2"></i>
+                                        Estado de Reparaciones
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px;">
+                                        <canvas id="graficoEstadoReparaciones"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-bar-chart me-2"></i>
+                                        Top 5 Marcas Más Vendidas
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px;">
+                                        <canvas id="graficoMarcasVendidas"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-pie-chart-fill me-2"></i>
+                                        Inventario por Estado
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container" style="position: relative; height: 300px;">
+                                        <canvas id="graficoInventarioEstado"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-secondary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Resumen de Inventario
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="h4 text-primary" id="total-dispositivos">0</div>
+                                            <div class="small text-muted">Total Dispositivos</div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="h4 text-info" id="stock-total">0</div>
+                                            <div class="small text-muted">Stock Total</div>
+                                        </div>
+                                        <div class="col-12">
+                                            <hr>
+                                            <div class="h5 text-success" id="valor-inventario">Q0.00</div>
+                                            <div class="small text-muted">Valor Total del Inventario</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Tipos de Servicio Solicitados</h6>
-                                <div id="tipos-servicio" class="loading-placeholder">
-                                    <div class="text-center p-4">
-                                        <div class="spinner-border text-secondary" role="status">
-                                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+
+                        <div class="col-lg-6 mb-4">
+                            <div class="card shadow">
+                                <div class="card-header bg-dark text-white">
+                                    <h5 class="mb-0">
+                                        <i class="bi bi-clock me-2"></i>
+                                        Estado del Sistema
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center">
+                                        <div class="mb-3">
+                                            <span class="badge bg-success fs-6">Sistema Operativo</span>
+                                        </div>
+                                        <div class="small text-muted">
+                                            <p><strong>Usuario:</strong> <?php echo $_SESSION['nombre']; ?></p>
+                                            <p><strong>Rol:</strong> <?php echo $_SESSION['rol']; ?></p>
+                                            <p><strong>Fecha:</strong> <span id="fechaActual"></span></p>
                                         </div>
                                     </div>
                                 </div>
@@ -244,111 +257,74 @@ $esAdmin = $_SESSION['rol'] === 'ADMIN';
                         </div>
                     </div>
 
-                    <!-- Tab Clientes -->
-                    <div class="tab-pane fade" id="tab-clientes">
-                        <div class="row">
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Top Compradores</h6>
-                                <div id="top-compradores" class="loading-placeholder">
-                                    <div class="text-center p-4">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Cargando...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <h6 class="text-muted mb-3">Clientes Frecuentes en Reparaciones</h6>
-                                <div id="clientes-reparaciones" class="loading-placeholder">
-                                    <div class="text-center p-4">
-                                        <div class="spinner-border text-warning" role="status">
-                                            <span class="visually-hidden">Cargando...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Estilos personalizados para el dashboard -->
 <style>
-    .card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    .border-left-primary {
+        border-left: 4px solid #007bff !important;
     }
-
+    .border-left-success {
+        border-left: 4px solid #28a745 !important;
+    }
+    .border-left-info {
+        border-left: 4px solid #17a2b8 !important;
+    }
+    .border-left-warning {
+        border-left: 4px solid #ffc107 !important;
+    }
+    
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
     .card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important;
     }
-
-    .nav-tabs .nav-link {
-        border: none;
-        color: #6c757d;
-        padding: 0.75rem 1rem;
-    }
-
-    .nav-tabs .nav-link.active {
-        background-color: transparent;
-        border-bottom: 2px solid #0d6efd;
-        color: #0d6efd;
-    }
-
-    .loading-placeholder {
-        min-height: 200px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-    }
-
-    .table-sm td {
-        padding: 0.5rem;
-        vertical-align: middle;
-    }
-
-    .badge-metric {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-    }
-
-    .progress-sm {
-        height: 0.5rem;
-    }
-
+    
     .chart-container {
         position: relative;
-        height: 400px;
-        width: 100%;
+        overflow: hidden;
     }
-
-    .btn-group-sm .btn {
-        padding: 0.25rem 0.5rem;
+    
+    canvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+    
+    .text-xs {
         font-size: 0.75rem;
     }
-
-    .dropdown-menu {
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        border: 1px solid #e9ecef;
+    
+    .loading-placeholder {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
     }
-
-    .text-truncate-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
 </style>
 
-<!-- Script específico para reportes -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.getElementById('fechaActual').textContent = new Date().toLocaleDateString('es-GT');
+    
+    function actualizarTimestamp() {
+        document.getElementById('ultimaActualizacion').textContent = new Date().toLocaleString('es-GT');
+    }
+    actualizarTimestamp();
+</script>
+
+
 <script src="<?= asset('build/js/reportes/index.js') ?>"></script>
+
+</body>
+</html>

@@ -66,14 +66,14 @@ $router->get('/reparaciones/eliminarAPI', [ReparacionesController::class, 'elimi
 $router->get('/reparaciones/buscarMarcasAPI', [ReparacionesController::class, 'buscarMarcasAPI']);
 $router->get('/reparaciones/buscarModelosPorMarcaAPI', [ReparacionesController::class, 'buscarModelosPorMarcaAPI']);
 
-// Rutas para Reportes y Dashboard
+// Rutas para las 4 gráficas principales del dashboard
 $router->get('/reportes', [ReportesController::class, 'renderizarPagina']);
-$router->get('/reportes/metricas', [ReportesController::class, 'obtenerMetricasPrincipalesAPI']);
-$router->get('/reportes/ventas', [ReportesController::class, 'obtenerReporteVentasAPI']);
-$router->get('/reportes/inventario', [ReportesController::class, 'obtenerAnalisisInventarioAPI']);
-$router->get('/reportes/reparaciones', [ReportesController::class, 'obtenerReporteReparacionesAPI']);
-$router->get('/reportes/clientes', [ReportesController::class, 'obtenerAnalisisClientesAPI']);
-$router->get('/reportes/graficos', [ReportesController::class, 'obtenerDatosGraficosAPI']);
+$router->get('/reportes/ventasPorMes', [ReportesController::class, 'ventasPorMesAPI']);
+$router->get('/reportes/estadoReparaciones', [ReportesController::class, 'estadoReparacionesAPI']);
+$router->get('/reportes/marcasMasVendidas', [ReportesController::class, 'marcasMasVendidasAPI']);
+$router->get('/reportes/inventarioPorEstado', [ReportesController::class, 'inventarioPorEstadoAPI']);
+$router->get('/reportes/estadisticasGenerales', [ReportesController::class, 'estadisticasGeneralesAPI']);
+
 
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

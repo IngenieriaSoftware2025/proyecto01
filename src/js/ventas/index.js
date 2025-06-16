@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 import DataTable from "datatables.net-bs5";
 import { validarFormulario } from "../funciones";
 import { lenguaje } from "../lenguaje";
+import { Modal } from "bootstrap";
 
 // Elementos DOM principales
 const FormVentas = document.getElementById("FormVentas");
@@ -549,7 +550,7 @@ const verDetalleVenta = async (e) => {
             document.getElementById('ContenidoDetalleVenta').innerHTML = contenidoModal;
             
             // Mostrar modal usando Bootstrap
-            const modal = new bootstrap.Modal(document.getElementById('ModalDetalleVenta'));
+            const modal = new Modal(document.getElementById('ModalDetalleVenta'));
             modal.show();
         } else {
             Swal.fire({

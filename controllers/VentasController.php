@@ -148,9 +148,9 @@ class VentasController extends ActiveRecord
             }
 
             // Crear la venta principal
-            $fechaHoy = date('Y-m-d');
+            $fechaHoy = 'TODAY';
             $queryVenta = "INSERT INTO ventas (cliente_id, usuario_id, total, fecha_venta, observaciones, situacion) 
-                      VALUES ($clienteId, $usuarioId, $total, '$fechaHoy', '$observaciones', 1)";
+              VALUES ($clienteId, $usuarioId, $total, TODAY, '$observaciones', 1)";
 
             $resultadoVenta = self::SQL($queryVenta);
 
