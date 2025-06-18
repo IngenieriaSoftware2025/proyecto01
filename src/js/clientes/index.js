@@ -49,47 +49,60 @@ const validarTelefono = () => {
   }
 };
 
-// FUNCIÓN PARA DETECTAR Y VALIDAR DOCUMENTO (SOLO NIT)
-const validarDocumento = () => {
+// FUNCIÓN PARA VALIDAR NIT GUATEMALTECO
+const validarNit = (nit) => {
+  const nitTrimmed = nit.trim();
+  let nd, add = 0;
+  
+  if (nd = /^(\d+)-?([\dkK])$/.exec(nitTrimmed)) {
+    nd[2] = (nd[2].toLowerCase() === 'k') ? 10 : parseInt(nd[2], 10);
+    
+    for (let i = 0; i < nd[1].length; i++) {
+      add += ((((i - nd[1].length) * -1) + 1) * parseInt(nd[1][i], 10));
+    }
+    
+    return ((11 - (add % 11)) % 11) === nd[2];
+  } else {
+    return false;
+  }
+};
+
+// FUNCIÓN PARA VALIDAR NIT EN TIEMPO REAL
+const validarNitEnTiempoReal = () => {
   const documento = InputDocumento.value.trim();
 
   if (documento.length < 1) {
     InputDocumento.classList.remove("is-valid", "is-invalid");
-    return { valido: true, tipo: null };
+    return true;
   }
 
-  let esValido = false;
-  let tipo = null;
-  let mensaje = "";
+  // Verificar formato básico de NIT
+  if (!/^[\d]+-?[\dkK]$/.test(documento)) {
+    InputDocumento.classList.remove("is-valid");
+    InputDocumento.classList.add("is-invalid");
+    return false;
+  }
 
-  // // VALIDAR ÚNICAMENTE NIT
-  // if (/^[\d]+-?[\dkK]$/.test(documento)) {
-  //   esValido = validarNit(documento);
-  //   tipo = "NIT";
-  //   mensaje = esValido ? "NIT válido" : "NIT inválido - Verifique el formato";
-  // } else {
-  //   esValido = false;
-  //   mensaje = "Formato no válido. Use formato NIT (123456-7)";
-  // }
+  // Validar NIT usando la función matemática
+  const esValido = validarNit(documento);
 
-  // Aplicar estilos de validación
   if (esValido) {
     InputDocumento.classList.remove("is-invalid");
     InputDocumento.classList.add("is-valid");
+    return true;
   } else {
     InputDocumento.classList.remove("is-valid");
     InputDocumento.classList.add("is-invalid");
-
+    
     Swal.fire({
       position: "center",
       icon: "error",
       title: "NIT inválido",
-      text: mensaje,
+      text: "El NIT ingresado no es válido. Use formato: 123456-7",
       showConfirmButton: true,
     });
+    return false;
   }
-
-  return { valido: esValido, tipo: tipo };
 };
 
 // INICIALIZAR DATATABLE
@@ -216,8 +229,8 @@ const guardarAPI = async (e) => {
     return;
   }
 
-  const validacionDoc = validarDocumento();
-  if (InputDocumento.value.trim() && !validacionDoc.valido) {
+  // Validar NIT si se ingresó
+  if (InputDocumento.value.trim() && !validarNitEnTiempoReal()) {
     BtnGuardar.disabled = false;
     BtnGuardar.innerHTML = '<i class="bi bi-floppy me-2"></i>Guardar Cliente';
     return;
@@ -387,8 +400,8 @@ const modificarAPI = async (e) => {
     return;
   }
 
-  const validacionDoc = validarDocumento();
-  if (InputDocumento.value.trim() && !validacionDoc.valido) {
+  // Validar NIT si se ingresó
+  if (InputDocumento.value.trim() && !validarNitEnTiempoReal()) {
     BtnModificar.disabled = false;
     BtnModificar.innerHTML = '<i class="bi bi-pencil me-2"></i>Modificar';
     return;
@@ -517,7 +530,7 @@ InputTelefono.addEventListener("input", () => {
 });
 
 InputTelefono.addEventListener("blur", validarTelefono);
-InputDocumento.addEventListener("blur", validarDocumento);
+InputDocumento.addEventListener("blur", validarNitEnTiempoReal);
 
 // Event listeners para tabla
 TablaClientes.on("click", ".eliminar", eliminarAPI);

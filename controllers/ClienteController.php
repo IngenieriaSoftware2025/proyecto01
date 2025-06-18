@@ -32,7 +32,6 @@ class ClienteController extends ActiveRecord
 
             $add = 0;
             for ($i = 0; $i < strlen($numero); $i++) {
-                // FÓRMULA CORREGIDA: Equivalente exacta del JavaScript
                 $add += ((($i - strlen($numero)) * -1) + 1) * intval($numero[$i]);
             }
 

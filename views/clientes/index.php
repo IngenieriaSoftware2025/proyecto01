@@ -28,7 +28,6 @@
                             <div class="col-lg-6">
                                 <label for="telefono" class="form-label">Teléfono <span class="text-danger">*</span></label>
                                 <input type="tel" class="form-control" id="telefono" name="telefono" placeholder="Ej: 23456789" maxlength="8">
-                                <div class="form-text">8 dígitos, debe iniciar con 2,3,4,5,6,7 u 8</div>
                             </div>
                             <div class="col-lg-6">
                                 <label for="correo" class="form-label">Correo Electrónico</label>
@@ -40,8 +39,7 @@
                         <div class="row mb-3 justify-content-center">
                             <div class="col-lg-6">
                                 <label for="nit" class="form-label">NIT</label>
-                                <input type="text" class="form-control" id="nit" name="nit" placeholder="NIT: 123456-7 o DPI: 1234567890123">
-                                <div class="form-text">NIT: formato 123456-7</div>
+                                <input type="text" class="form-control" id="nit" name="nit" placeholder="NIT: 123456-7">
                             </div>
                             <div class="col-lg-6">
                                 <label for="situacion" class="form-label">Estado del Cliente</label>

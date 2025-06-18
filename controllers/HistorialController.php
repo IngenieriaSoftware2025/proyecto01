@@ -20,25 +20,27 @@ class HistorialController extends ActiveRecord
     {
         try {
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'N/A';
-            
+
             // Convertir arrays a JSON si es necesario
             $datosAnteriorJson = $datosAnteriores ? json_encode($datosAnteriores) : null;
             $datosNuevosJson = $datosNuevos ? json_encode($datosNuevos) : null;
-            
+
             $query = "INSERT INTO historial_actividades (
-                historial_usuario_id, historial_modulo, historial_accion, 
-                historial_tabla_afectada, historial_registro_id, historial_descripcion,
-                historial_datos_anteriores, historial_datos_nuevos, historial_ip
+            historial_usuario_id, historial_modulo, historial_accion, 
+            historial_tabla_afectada, historial_registro_id, historial_descripcion,
+            historial_datos_anteriores, historial_datos_nuevos, historial_ip,
+            historial_fecha
             ) VALUES (
-                $usuarioId, '$modulo', '$accion', 
-                " . ($tablaAfectada ? "'$tablaAfectada'" : "NULL") . ", 
-                " . ($registroId ? $registroId : "NULL") . ", 
-                '$descripcion',
-                " . ($datosAnteriorJson ? "'$datosAnteriorJson'" : "NULL") . ",
-                " . ($datosNuevosJson ? "'$datosNuevosJson'" : "NULL") . ",
-                '$ip'
+            $usuarioId, '$modulo', '$accion', 
+            " . ($tablaAfectada ? "'$tablaAfectada'" : "NULL") . ", 
+            " . ($registroId ? $registroId : "NULL") . ", 
+            '$descripcion',
+            " . ($datosAnteriorJson ? "'$datosAnteriorJson'" : "NULL") . ",
+            " . ($datosNuevosJson ? "'$datosNuevosJson'" : "NULL") . ",
+            '$ip',
+            CURRENT YEAR TO MINUTE
             )";
-            
+
             return self::SQL($query);
         } catch (Exception $e) {
             error_log("Error registrando actividad: " . $e->getMessage());
@@ -59,48 +61,50 @@ class HistorialController extends ActiveRecord
             $limite = $_GET['limite'] ?? 100;
 
             $whereConditions = ["h.historial_situacion = 1"];
-            
+
             if ($filtroFecha) {
-                $whereConditions[] = "h.historial_fecha >= '$filtroFecha'";
+                $fechaInformix = date('Y-m-d H:i:s', strtotime($filtroFecha));
+                $whereConditions[] = "h.historial_fecha >= '$fechaInformix'";
             }
-            
+
             if ($filtroUsuario) {
                 $whereConditions[] = "h.historial_usuario_id = " . intval($filtroUsuario);
             }
-            
+
             if ($filtroModulo) {
                 $whereConditions[] = "h.historial_modulo = '$filtroModulo'";
             }
 
             $whereClause = implode(' AND ', $whereConditions);
 
-            $consulta = "SELECT 
-                            h.historial_id,
-                            h.historial_modulo,
-                            h.historial_accion,
-                            h.historial_tabla_afectada,
-                            h.historial_registro_id,
-                            h.historial_descripcion,
-                            h.historial_datos_anteriores,
-                            h.historial_datos_nuevos,
-                            h.historial_ip,
-                            TO_CHAR(h.historial_fecha, '%d/%m/%Y %H:%M') as fecha_formateada,
-                            u.usu_nombre as usuario_nombre,
-                            u.usu_codigo as usuario_codigo
-                        FROM historial_actividades h
-                        INNER JOIN usuario_login2025 u ON h.historial_usuario_id = u.usu_id
-                        WHERE $whereClause
-                        ORDER BY h.historial_fecha DESC
-                        LIMIT " . intval($limite);
+            $consulta = "SELECT FIRST " . intval($limite) . "
+            h.historial_id,
+            h.historial_modulo,
+            h.historial_accion,
+            h.historial_tabla_afectada,
+            h.historial_registro_id,
+            h.historial_descripcion,
+            h.historial_datos_anteriores,
+            h.historial_datos_nuevos,
+            h.historial_ip,
+            h.historial_fecha,
+            u.usu_nombre as usuario_nombre,
+            u.usu_codigo as usuario_codigo
+            FROM historial_actividades h
+            INNER JOIN usuario_login2025 u ON h.historial_usuario_id = u.usu_id
+            WHERE $whereClause
+            ORDER BY h.historial_fecha DESC";
 
             $actividades = self::fetchArray($consulta);
 
             // Procesar datos para mejor visualización
             $actividadesProcesadas = [];
             foreach ($actividades as $actividad) {
+                $fechaFormateada = date('d/m/Y H:i', strtotime($actividad['historial_fecha']));
+
                 $actividadesProcesadas[] = [
                     'historial_id' => $actividad['historial_id'],
-                    'fecha' => $actividad['fecha_formateada'],
+                    'fecha' => $fechaFormateada,
                     'usuario' => $actividad['usuario_nombre'] . ' (' . $actividad['usuario_codigo'] . ')',
                     'modulo' => $actividad['historial_modulo'],
                     'accion' => $actividad['historial_accion'],
@@ -120,7 +124,6 @@ class HistorialController extends ActiveRecord
                 'data' => $actividadesProcesadas,
                 'total' => count($actividadesProcesadas)
             ]);
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -140,14 +143,14 @@ class HistorialController extends ActiveRecord
         try {
             // Actividades por día (últimos 7 días)
             $queryPorDia = "SELECT 
-                               TO_CHAR(historial_fecha, '%d/%m') as dia,
-                               COUNT(*) as cantidad
-                           FROM historial_actividades 
-                           WHERE historial_fecha >= (TODAY - 7)
-                           AND historial_situacion = 1
-                           GROUP BY TO_CHAR(historial_fecha, '%d/%m')
-                           ORDER BY historial_fecha DESC";
-            
+                   DAY(historial_fecha) || '/' || MONTH(historial_fecha) as dia,
+                   COUNT(*) as cantidad
+               FROM historial_actividades 
+               WHERE historial_fecha >= CURRENT - 7 UNITS DAY
+               AND historial_situacion = 1
+               GROUP BY DAY(historial_fecha), MONTH(historial_fecha)
+               ORDER BY historial_fecha DESC";
+
             $actividadesPorDia = self::fetchArray($queryPorDia);
 
             // Actividades por módulo
@@ -159,21 +162,20 @@ class HistorialController extends ActiveRecord
                              AND historial_situacion = 1
                              GROUP BY historial_modulo
                              ORDER BY cantidad DESC";
-            
+
             $actividadesPorModulo = self::fetchArray($queryPorModulo);
 
             // Usuarios más activos
-            $queryUsuariosActivos = "SELECT 
-                                       u.usu_nombre as usuario,
-                                       COUNT(*) as actividades
-                                   FROM historial_actividades h
-                                   INNER JOIN usuario_login2025 u ON h.historial_usuario_id = u.usu_id
-                                   WHERE h.historial_fecha >= (TODAY - 30)
-                                   AND h.historial_situacion = 1
-                                   GROUP BY u.usu_nombre, u.usu_id
-                                   ORDER BY actividades DESC
-                                   LIMIT 10";
-            
+            $queryUsuariosActivos = "SELECT FIRST 10
+                           u.usu_nombre as usuario,
+                           COUNT(*) as actividades
+                       FROM historial_actividades h
+                       INNER JOIN usuario_login2025 u ON h.historial_usuario_id = u.usu_id
+                       WHERE h.historial_fecha >= CURRENT - 30 UNITS DAY
+                       AND h.historial_situacion = 1
+                       GROUP BY u.usu_nombre, u.usu_id
+                       ORDER BY actividades DESC";
+
             $usuariosActivos = self::fetchArray($queryUsuariosActivos);
 
             http_response_code(200);
@@ -186,7 +188,6 @@ class HistorialController extends ActiveRecord
                     'usuarios_activos' => $usuariosActivos
                 ]
             ]);
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -208,7 +209,7 @@ class HistorialController extends ActiveRecord
                         FROM usuario_login2025 
                         WHERE usu_situacion = 1 
                         ORDER BY usu_nombre";
-            
+
             $usuarios = self::fetchArray($consulta);
 
             http_response_code(200);
@@ -217,7 +218,6 @@ class HistorialController extends ActiveRecord
                 'mensaje' => 'Usuarios obtenidos exitosamente',
                 'data' => $usuarios
             ]);
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
@@ -239,7 +239,7 @@ class HistorialController extends ActiveRecord
                         FROM historial_actividades 
                         WHERE historial_situacion = 1 
                         ORDER BY historial_modulo";
-            
+
             $modulos = self::fetchArray($consulta);
 
             http_response_code(200);
@@ -248,7 +248,6 @@ class HistorialController extends ActiveRecord
                 'mensaje' => 'Módulos obtenidos exitosamente',
                 'data' => $modulos
             ]);
-
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
