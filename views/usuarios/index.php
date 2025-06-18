@@ -22,14 +22,21 @@ if (!isset($_SESSION['login']) || $_SESSION['rol'] !== 'ADMIN') {
                         <input type="hidden" id="usu_id" name="usu_id">
 
                         <div class="row mb-3 justify-content-center">
+                        <div class="col-lg-6">
+                                <label for="usu_codigo" class="form-label">Código de Usuario <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="usu_codigo" name="usu_codigo"
+                                    placeholder="Ingrese código de 6 dígitos" min="100000" max="999999" required>
+                                <small class="form-text text-muted">Código único de 6 dígitos para login</small>
+                            </div>
                             <div class="col-lg-6">
-                                <label for="usu_nombre" class="form-label">Nombre de Usuario <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="usu_nombre" name="usu_nombre" placeholder="Ingrese nombre de usuario" required>
+                                <label for="usu_nombre" class="form-label">Nombre Completo <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="usu_nombre" name="usu_nombre"
+                                    placeholder="Ingrese nombre completo del usuario" required>
                             </div>
                             <div class="col-lg-6">
                                 <label for="usu_password" class="form-label">Contraseña <span class="text-danger">*</span></label>
                                 <input type="password" class="form-control" id="usu_password" name="usu_password" placeholder="Ingrese contraseña" required>
-                                <small class="form-text text-muted">Deje vacío para mantener la contraseña actual (solo al modificar)</small>
+                                <small class="form-text text-muted">Se generará código automáticamente</small>
                             </div>
                         </div>
 
@@ -113,18 +120,18 @@ if (!isset($_SESSION['login']) || $_SESSION['rol'] !== 'ADMIN') {
 </div>
 
 <style>
-.custom-card {
-    border-radius: 10px;
-    border: 1px solid #007bff;
-}
+    .custom-card {
+        border-radius: 10px;
+        border: 1px solid #007bff;
+    }
 
-.table td {
-    vertical-align: middle;
-}
+    .table td {
+        vertical-align: middle;
+    }
 
-.badge {
-    font-size: 0.75rem;
-}
+    .badge {
+        font-size: 0.75rem;
+    }
 </style>
 
 <script src="<?= asset('build/js/usuarios/index.js') ?>"></script>

@@ -89,9 +89,5 @@ $router->get('/configuracion', [ConfiguracionController::class, 'renderizarPagin
 $router->get('/configuracion/obtenerConfiguracionAPI', [ConfiguracionController::class, 'obtenerConfiguracionAPI']);
 $router->post('/configuracion/crearRespaldoAPI', [ConfiguracionController::class, 'crearRespaldoAPI']);
 
-// AGREGAR ESTA LÍNEA después de las rutas existentes
-$router->get('/registro', [AppController::class, 'renderRegistro']);
-$router->post('/registro/guardarAPI', [AppController::class, 'registroAPI']);
-
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

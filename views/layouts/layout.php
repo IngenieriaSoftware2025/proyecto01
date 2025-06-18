@@ -263,11 +263,13 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" aria-current="page" href="/proyecto01/ventas">
-                                <i class="bi bi-cart3 me-2"></i>Ventas
-                            </a>
-                        </li>
+                        <?php if ($_SESSION['rol'] === 'ADMIN'): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" aria-current="page" href="/proyecto01/ventas">
+                                    <i class="bi bi-cart3 me-2"></i>Ventas
+                                </a>
+                            </li>
+                        <?php endif; ?>
 
                         <li class="nav-item">
                             <a class="nav-link" href="/proyecto01/reparaciones">

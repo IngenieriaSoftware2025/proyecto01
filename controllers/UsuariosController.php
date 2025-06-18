@@ -19,11 +19,11 @@ class UsuariosController extends ActiveRecord
     // MÉTODO PARA BUSCAR USUARIOS
     public static function buscarAPI()
     {
-        hasPermissionApi(['ADMIN']); // Solo administradores
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
 
         try {
-            $consulta = "SELECT usu_id, usu_nombre, usu_catalogo, usu_password, usu_situacion 
+            $consulta = "SELECT usu_id, usu_codigo, usu_nombre, usu_situacion 
                         FROM usuario_login2025 
                         WHERE usu_situacion IN (1,2) 
                         ORDER BY usu_nombre";
@@ -48,58 +48,74 @@ class UsuariosController extends ActiveRecord
     // MÉTODO PARA CREAR NUEVO USUARIO
     public static function guardarAPI()
     {
-        hasPermissionApi(['ADMIN']); // Solo administradores
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
 
-        // Validaciones básicas
+        if (empty($_POST['usu_codigo'])) {
+            http_response_code(400);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'El código de usuario es obligatorio'
+            ]);
+            return;
+        }
+
         if (empty($_POST['usu_nombre'])) {
             http_response_code(400);
-            echo json_encode(['codigo' => 0, 'mensaje' => 'El nombre de usuario es obligatorio']);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'El nombre del usuario es obligatorio'
+            ]);
             return;
         }
 
         if (empty($_POST['usu_password'])) {
             http_response_code(400);
-            echo json_encode(['codigo' => 0, 'mensaje' => 'La contraseña es obligatoria']);
-            return;
-        }
-
-        if (empty($_POST['usu_catalogo'])) {
-            http_response_code(400);
-            echo json_encode(['codigo' => 0, 'mensaje' => 'El rol es obligatorio']);
+            echo json_encode([
+                'codigo' => 0,
+                'mensaje' => 'La contraseña es obligatoria'
+            ]);
             return;
         }
 
         try {
+            $codigo = intval($_POST['usu_codigo']);
             $nombre = trim(htmlspecialchars($_POST['usu_nombre']));
             $password = password_hash($_POST['usu_password'], PASSWORD_DEFAULT);
-            $rol = htmlspecialchars($_POST['usu_catalogo']);
             $situacion = intval($_POST['usu_situacion'] ?? 1);
 
-            // Verificar duplicados
-            $consulta = "SELECT COUNT(*) as total FROM usuario_login2025 WHERE usu_nombre = '$nombre'";
+            $consulta = "SELECT COUNT(*) as total FROM usuario_login2025 WHERE usu_codigo = $codigo";
             $resultado = self::fetchFirst($consulta);
-            
+
             if ($resultado['total'] > 0) {
                 http_response_code(400);
-                echo json_encode(['codigo' => 0, 'mensaje' => 'Ya existe un usuario con este nombre']);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Ya existe un usuario con este código'
+                ]);
                 return;
             }
 
-            // Insertar usuario
-            $query = "INSERT INTO usuario_login2025 (usu_nombre, usu_password, usu_catalogo, usu_situacion) 
-                     VALUES ('$nombre', '$password', '$rol', $situacion)";
-            
-            $resultado = self::$db->exec($query);
+            $rol = htmlspecialchars($_POST['usu_catalogo'] ?? 'USER');
+
+            $query = "INSERT INTO usuario_login2025 (usu_codigo, usu_nombre, usu_password, usu_situacion) 
+         VALUES ($codigo, '$nombre', '$password', $situacion)";
+
+            $resultado = self::SQL($query);
 
             if ($resultado) {
                 http_response_code(200);
-                echo json_encode(['codigo' => 1, 'mensaje' => 'Usuario creado exitosamente']);
+                echo json_encode([
+                    'codigo' => 1,
+                    'mensaje' => 'Usuario creado exitosamente'
+                ]);
             } else {
                 http_response_code(400);
-                echo json_encode(['codigo' => 0, 'mensaje' => 'Error al crear el usuario']);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error al crear el usuario'
+                ]);
             }
-
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([
@@ -138,7 +154,7 @@ class UsuariosController extends ActiveRecord
             $consulta = "SELECT COUNT(*) as total FROM usuario_login2025 
                         WHERE usu_nombre = '$nombre' AND usu_id != $id";
             $resultado = self::fetchFirst($consulta);
-            
+
             if ($resultado['total'] > 0) {
                 http_response_code(400);
                 echo json_encode(['codigo' => 0, 'mensaje' => 'Ya existe otro usuario con este nombre']);
@@ -168,7 +184,6 @@ class UsuariosController extends ActiveRecord
                 http_response_code(400);
                 echo json_encode(['codigo' => 0, 'mensaje' => 'Error al actualizar el usuario']);
             }
-
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([
@@ -204,7 +219,6 @@ class UsuariosController extends ActiveRecord
                 http_response_code(400);
                 echo json_encode(['codigo' => 0, 'mensaje' => 'Error al eliminar el usuario']);
             }
-
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([

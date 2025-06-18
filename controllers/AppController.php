@@ -176,21 +176,4 @@ class AppController extends ActiveRecord
             'rol' => $_SESSION['rol']
         ]);
     }
-
-    public static function renderRegistro(Router $router)
-    {
-        $router->render('registro/index', []);
-    }
-
-    public static function registroAPI()
-    {
-        getHeadersApi();
-
-        if (empty($_POST['usu_nombre']) || empty($_POST['usu_password'])) {
-            http_response_code(400);
-            echo json_encode(['codigo' => 0, 'mensaje' => 'Campos obligatorios faltantes']);
-            return;
-        }
-        echo json_encode(['codigo' => 1, 'mensaje' => 'Registro exitoso']);
-    }
 }
