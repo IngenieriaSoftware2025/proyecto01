@@ -49,23 +49,6 @@ const validarTelefono = () => {
   }
 };
 
-// FUNCIÓN PARA VALIDAR NIT GUATEMALTECO (CORREGIDA)
-const validarNit = (nit) => {
-  const nitLimpio = nit.trim();
-  let nd, add = 0;
-
-  if (nd = /^(\d+)-?([\dkK])$/.exec(nitLimpio)) {
-    nd[2] = (nd[2].toLowerCase() === 'k') ? 10 : parseInt(nd[2], 10);
-
-    for (let i = 0; i < nd[1].length; i++) {
-      add += ((((i - nd[1].length) * -1) + 1) * parseInt(nd[1][i], 10));
-    }
-    return ((11 - (add % 11)) % 11) === nd[2];
-  } else {
-    return false;
-  }
-};
-
 // FUNCIÓN PARA DETECTAR Y VALIDAR DOCUMENTO (SOLO NIT)
 const validarDocumento = () => {
   const documento = InputDocumento.value.trim();
