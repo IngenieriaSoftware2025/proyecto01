@@ -96,8 +96,6 @@ class UsuariosController extends ActiveRecord
                 return;
             }
 
-            $rol = htmlspecialchars($_POST['usu_catalogo'] ?? 'USER');
-
             $query = "INSERT INTO usuario_login2025 (usu_codigo, usu_nombre, usu_password, usu_situacion) 
          VALUES ($codigo, '$nombre', '$password', $situacion)";
 
@@ -147,7 +145,7 @@ class UsuariosController extends ActiveRecord
 
         try {
             $nombre = trim(htmlspecialchars($_POST['usu_nombre']));
-            $rol = htmlspecialchars($_POST['usu_catalogo']);
+            $codigo = intval($_POST['usu_codigo']);
             $situacion = intval($_POST['usu_situacion'] ?? 1);
 
             // Verificar duplicados excluyendo el registro actual
@@ -164,7 +162,6 @@ class UsuariosController extends ActiveRecord
             // Construir query de actualización
             $query = "UPDATE usuario_login2025 SET 
                         usu_nombre = '$nombre',
-                        usu_catalogo = '$rol',
                         usu_situacion = $situacion";
 
             // Solo actualizar contraseña si se proporciona

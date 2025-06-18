@@ -42,8 +42,8 @@ if (!isset($_SESSION['login']) || $_SESSION['rol'] !== 'ADMIN') {
 
                         <div class="row mb-3 justify-content-center">
                             <div class="col-lg-6">
-                                <label for="usu_catalogo" class="form-label">Rol <span class="text-danger">*</span></label>
-                                <select class="form-control" id="usu_catalogo" name="usu_catalogo" required>
+                                <label for="usu_codigo" class="form-label">Rol <span class="text-danger">*</span></label>
+                                <select class="form-control" id="usu_codigo" name="usu_codigo" required>
                                     <option value="">Seleccione un rol...</option>
                                     <option value="ADMIN">Administrador</option>
                                     <option value="USER">Usuario</option>

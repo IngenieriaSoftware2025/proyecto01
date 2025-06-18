@@ -350,7 +350,6 @@ const cargarGraficoInventarioEstado = async () => {
     }
 };
 
-
 const cargarMetricasPrincipales = async () => {
     try {
         const respuesta = await fetch('/proyecto01/reportes/estadisticasGenerales');

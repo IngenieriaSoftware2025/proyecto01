@@ -25,9 +25,9 @@ class ReportesController extends ActiveRecord
             $consulta = "SELECT 
             fecha_venta,
             COUNT(*) as cantidad_ventas,
-            NVL(SUM(total), 0) as total_ingresos
+            SUM(total) as total_ingresos
             FROM ventas 
-            WHERE fecha_venta >= (TODAY - 180 UNITS DAY) 
+            WHERE fecha_venta >= (TODAY - 180) 
             AND situacion = 1 
             AND estado = 'COMPLETADA'
             GROUP BY fecha_venta
@@ -38,11 +38,14 @@ class ReportesController extends ActiveRecord
             $meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
             $datosFormateados = [];
 
+            $datosFormateados = [];
+
             foreach ($datos as $dato) {
+                $mesIndex = intval($dato['mes']) - 1;
                 $datosFormateados[] = [
-                    'label' => $meses[$dato['mes'] - 1],
-                    'ventas' => $dato['total_ventas'],
-                    'monto' => $dato['monto_total']
+                    'label' => $meses[$mesIndex] . ' ' . $dato['año'],
+                    'ventas' => intval($dato['cantidad_ventas']),
+                    'monto' => floatval($dato['total_ingresos'] ?? 0)
                 ];
             }
 
@@ -112,26 +115,24 @@ class ReportesController extends ActiveRecord
         getHeadersApi();
 
         try {
-            $consulta = "SELECT 
-                            m.nombre as marca,
-                            SUM(vd.cantidad) as total_vendido
-                        FROM venta_detalle vd
-                        INNER JOIN inventario i ON vd.inventario_id = i.id
-                        INNER JOIN marcas m ON i.marca_id = m.id
-                        INNER JOIN ventas v ON vd.venta_id = v.venta_id
-                        WHERE v.situacion = 1
-                        GROUP BY m.nombre
-                        ORDER BY total_vendido DESC
-                        LIMIT 5";
+            $consulta = "SELECT FIRST 5
+            m.nombre as marca,
+            SUM(vd.cantidad) as total_vendido
+            FROM venta_detalle vd
+            INNER JOIN inventario i ON vd.inventario_id = i.id
+            INNER JOIN marcas m ON i.marca_id = m.id
+            INNER JOIN ventas v ON vd.venta_id = v.venta_id
+            WHERE v.situacion = 1
+            GROUP BY m.nombre
+            ORDER BY total_vendido DESC";
 
             $datos = self::fetchArray($consulta);
 
             $datosFormateados = [];
             foreach ($datos as $dato) {
                 $datosFormateados[] = [
-                    'label' => $dato['fecha_venta'],
-                    'ventas' => $dato['cantidad_ventas'],
-                    'monto' => $dato['total_ingresos']
+                    'label' => $dato['marca'],
+                    'value' => intval($dato['total_vendido'])
                 ];
             }
 
