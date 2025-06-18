@@ -20,7 +20,8 @@ const guardarUsuario = async (e) => {
   if (
     !FormUsuarios.usu_codigo.value ||
     !FormUsuarios.usu_nombre.value ||
-    !FormUsuarios.usu_password.value
+    !FormUsuarios.usu_password.value ||
+    !FormUsuarios.usu_rol.value
   ) {
     Toast.fire({
       icon: "error",

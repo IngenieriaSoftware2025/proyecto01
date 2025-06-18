@@ -55,68 +55,12 @@ if (!isset($_SESSION['login']) || $_SESSION['rol'] !== 'ADMIN') {
                                 </button>
                             </div>
                             <div class="col-auto">
-                                <button class="btn btn-info btn-lg" type="button" id="BtnEstadisticas">
-                                    <i class="bi bi-bar-chart me-2"></i>Ver Estadísticas
-                                </button>
-                            </div>
-                            <div class="col-auto">
                                 <button class="btn btn-secondary btn-lg" type="reset" id="BtnLimpiarFiltros">
                                     <i class="bi bi-arrow-clockwise me-2"></i>Limpiar Filtros
                                 </button>
                             </div>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Sección de Estadísticas (inicialmente oculta) -->
-<div class="row justify-content-center p-3 d-none" id="seccion-estadisticas">
-    <div class="col-lg-12">
-        <div class="card custom-card shadow-lg" style="border-radius: 10px; border: 1px solid #28a745;">
-            <div class="card-body p-3">
-                <div class="row mb-3">
-                    <h4 class="text-center text-success">Estadísticas de Actividad (Últimos 30 días)</h4>
-                </div>
-
-                <div class="row">
-                    <!-- Actividades por Día -->
-                    <div class="col-lg-4 mb-4">
-                        <div class="card border-primary">
-                            <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0"><i class="bi bi-calendar3 me-2"></i>Actividades por Día</h6>
-                            </div>
-                            <div class="card-body" id="actividades-por-dia">
-                                <!-- Se carga dinámicamente -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Actividades por Módulo -->
-                    <div class="col-lg-4 mb-4">
-                        <div class="card border-info">
-                            <div class="card-header bg-info text-white">
-                                <h6 class="mb-0"><i class="bi bi-grid me-2"></i>Actividades por Módulo</h6>
-                            </div>
-                            <div class="card-body" id="actividades-por-modulo">
-                                <!-- Se carga dinámicamente -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Usuarios Más Activos -->
-                    <div class="col-lg-4 mb-4">
-                        <div class="card border-success">
-                            <div class="card-header bg-success text-white">
-                                <h6 class="mb-0"><i class="bi bi-people me-2"></i>Usuarios Más Activos</h6>
-                            </div>
-                            <div class="card-body" id="usuarios-activos">
-                                <!-- Se carga dinámicamente -->
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

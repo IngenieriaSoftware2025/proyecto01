@@ -277,12 +277,6 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="/proyecto01/reportes">
-                                <i class="bi bi-graph-up me-2"></i>Reportes
-                            </a>
-                        </li>
-
                         <!-- MENÚ ADMINISTRADOR -->
                         <?php if ($_SESSION['rol'] === 'ADMIN'): ?>
                             <li class="nav-item dropdown">

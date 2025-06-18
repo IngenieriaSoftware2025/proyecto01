@@ -7,11 +7,9 @@ import { Modal } from "bootstrap";
 // Elementos DOM principales
 const FormFiltrosHistorial = document.getElementById("FormFiltrosHistorial");
 const BtnBuscarHistorial = document.getElementById("BtnBuscarHistorial");
-const BtnEstadisticas = document.getElementById("BtnEstadisticas");
 const BtnLimpiarFiltros = document.getElementById("BtnLimpiarFiltros");
 const seccionHistorial = document.getElementById("seccion-historial");
 const mensajeSinHistorial = document.getElementById("mensaje-sin-historial");
-const seccionEstadisticas = document.getElementById("seccion-estadisticas");
 
 // Variables globales
 let TablaHistorial = null;
@@ -301,85 +299,6 @@ const verDetalleActividad = (e) => {
     modal.show();
 };
 
-// FUNCIÓN PARA CARGAR ESTADÍSTICAS
-const cargarEstadisticas = async () => {
-    BtnEstadisticas.disabled = true;
-    BtnEstadisticas.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cargando...';
-
-    try {
-        const respuesta = await fetch('/proyecto01/historial/estadisticasActividadAPI');
-        const datos = await respuesta.json();
-
-        if (datos.codigo === 1) {
-            mostrarEstadisticas(datos.data);
-            seccionEstadisticas.classList.remove('d-none');
-            seccionEstadisticas.classList.add('fade-in');
-
-            // Scroll suave hacia las estadísticas
-            seccionEstadisticas.scrollIntoView({ behavior: 'smooth' });
-
-            Toast.fire({
-                icon: 'success',
-                title: 'Estadísticas cargadas exitosamente'
-            });
-        } else {
-            Toast.fire({
-                icon: 'error',
-                title: datos.mensaje
-            });
-        }
-
-    } catch (error) {
-        console.error('Error:', error);
-        Toast.fire({
-            icon: 'error',
-            title: 'Error al cargar estadísticas'
-        });
-    } finally {
-        BtnEstadisticas.disabled = false;
-        BtnEstadisticas.innerHTML = '<i class="bi bi-bar-chart me-2"></i>Ver Estadísticas';
-    }
-};
-
-// FUNCIÓN PARA MOSTRAR ESTADÍSTICAS
-const mostrarEstadisticas = (estadisticas) => {
-    // Actividades por día
-    let htmlPorDia = '';
-    estadisticas.actividades_por_dia.forEach(actividad => {
-        htmlPorDia += `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">${actividad.dia}</span>
-                <span class="badge bg-primary">${actividad.cantidad}</span>
-            </div>
-        `;
-    });
-    document.getElementById('actividades-por-dia').innerHTML = htmlPorDia || '<p class="text-muted">Sin datos</p>';
-
-    // Actividades por módulo
-    let htmlPorModulo = '';
-    estadisticas.actividades_por_modulo.forEach(actividad => {
-        htmlPorModulo += `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">${actividad.modulo}</span>
-                <span class="badge bg-info">${actividad.cantidad}</span>
-            </div>
-        `;
-    });
-    document.getElementById('actividades-por-modulo').innerHTML = htmlPorModulo || '<p class="text-muted">Sin datos</p>';
-
-    // Usuarios más activos
-    let htmlUsuarios = '';
-    estadisticas.usuarios_activos.forEach(usuario => {
-        htmlUsuarios += `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="fw-bold">${usuario.usuario}</span>
-                <span class="badge bg-success">${usuario.actividades}</span>
-            </div>
-        `;
-    });
-    document.getElementById('usuarios-activos').innerHTML = htmlUsuarios || '<p class="text-muted">Sin datos</p>';
-};
-
 // FUNCIÓN PARA LIMPIAR FILTROS
 const limpiarFiltros = () => {
     FormFiltrosHistorial.reset();
@@ -410,7 +329,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // EVENT LISTENERS
 BtnBuscarHistorial.addEventListener('click', buscarHistorial);
-BtnEstadisticas.addEventListener('click', cargarEstadisticas);
 BtnLimpiarFiltros.addEventListener('click', limpiarFiltros);
 
 console.log('Módulo de historial de actividades inicializado correctamente');

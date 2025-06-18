@@ -5,6 +5,7 @@ namespace Controllers;
 use Exception;
 use MVC\Router;
 use Model\ActiveRecord;
+use DateTime;
 
 class HistorialController extends ActiveRecord
 {
@@ -48,6 +49,26 @@ class HistorialController extends ActiveRecord
         }
     }
 
+    // MÉTODO PRIVADO PARA FORMATEAR FECHA INFORMIX
+    private static function formatearFechaInformix($fecha)
+    {
+        try {
+            // Eliminar caracteres no deseados
+            $fechaLimpia = trim($fecha);
+            $fechaLimpia = preg_replace('/[^0-9\-]/', '', $fechaLimpia);
+            
+            // Validar y formatear
+            $fechaObj = DateTime::createFromFormat('Y-m-d', $fechaLimpia);
+            if ($fechaObj && $fechaObj->format('Y-m-d') === $fechaLimpia) {
+                return $fechaObj->format('Y-m-d 00:00:00');
+            }
+            return null;
+        } catch (Exception $e) {
+            error_log("Error formateando fecha: " . $e->getMessage());
+            return null;
+        }
+    }
+
     // MÉTODO PARA BUSCAR HISTORIAL
     public static function buscarHistorialAPI()
     {
@@ -62,17 +83,27 @@ class HistorialController extends ActiveRecord
 
             $whereConditions = ["h.historial_situacion = 1"];
 
+            // Procesar filtro de fecha con validación mejorada
             if ($filtroFecha) {
-                $fechaInformix = date('Y-m-d H:i:s', strtotime($filtroFecha));
-                $whereConditions[] = "h.historial_fecha >= '$fechaInformix'";
+                $fechaFormateada = self::formatearFechaInformix($filtroFecha);
+                if ($fechaFormateada) {
+                    $whereConditions[] = "h.historial_fecha >= TO_DATE('$fechaFormateada', '%Y-%m-%d %H:%M:%S')";
+                }
             }
 
+            // Procesar filtro de usuario
             if ($filtroUsuario) {
-                $whereConditions[] = "h.historial_usuario_id = " . intval($filtroUsuario);
+                $usuarioId = intval($filtroUsuario);
+                if ($usuarioId > 0) {
+                    $whereConditions[] = "h.historial_usuario_id = $usuarioId";
+                }
             }
 
+            // Procesar filtro de módulo
             if ($filtroModulo) {
-                $whereConditions[] = "h.historial_modulo = '$filtroModulo'";
+                $moduloLimpio = trim($filtroModulo);
+                $moduloLimpio = addslashes($moduloLimpio);
+                $whereConditions[] = "h.historial_modulo = '$moduloLimpio'";
             }
 
             $whereClause = implode(' AND ', $whereConditions);
@@ -100,7 +131,16 @@ class HistorialController extends ActiveRecord
             // Procesar datos para mejor visualización
             $actividadesProcesadas = [];
             foreach ($actividades as $actividad) {
-                $fechaFormateada = date('d/m/Y H:i', strtotime($actividad['historial_fecha']));
+                // Formatear fecha de manera segura
+                $fechaFormateada = 'N/A';
+                if ($actividad['historial_fecha']) {
+                    try {
+                        $fechaObj = new DateTime($actividad['historial_fecha']);
+                        $fechaFormateada = $fechaObj->format('d/m/Y H:i');
+                    } catch (Exception $e) {
+                        $fechaFormateada = $actividad['historial_fecha'];
+                    }
+                }
 
                 $actividadesProcesadas[] = [
                     'historial_id' => $actividad['historial_id'],
@@ -124,77 +164,26 @@ class HistorialController extends ActiveRecord
                 'data' => $actividadesProcesadas,
                 'total' => count($actividadesProcesadas)
             ]);
+
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'Error al obtener historial',
-                'detalle' => $e->getMessage()
-            ]);
-        }
-    }
-
-    // MÉTODO PARA OBTENER ESTADÍSTICAS DE ACTIVIDAD
-    public static function estadisticasActividadAPI()
-    {
-        hasPermissionApi(['ADMIN']);
-        getHeadersApi();
-
-        try {
-            // Actividades por día (últimos 7 días)
-            $queryPorDia = "SELECT 
-                   DAY(historial_fecha) || '/' || MONTH(historial_fecha) as dia,
-                   COUNT(*) as cantidad
-               FROM historial_actividades 
-               WHERE historial_fecha >= CURRENT - 7 UNITS DAY
-               AND historial_situacion = 1
-               GROUP BY DAY(historial_fecha), MONTH(historial_fecha)
-               ORDER BY historial_fecha DESC";
-
-            $actividadesPorDia = self::fetchArray($queryPorDia);
-
-            // Actividades por módulo
-            $queryPorModulo = "SELECT 
-                                 historial_modulo as modulo,
-                                 COUNT(*) as cantidad
-                             FROM historial_actividades 
-                             WHERE historial_fecha >= (TODAY - 30)
-                             AND historial_situacion = 1
-                             GROUP BY historial_modulo
-                             ORDER BY cantidad DESC";
-
-            $actividadesPorModulo = self::fetchArray($queryPorModulo);
-
-            // Usuarios más activos
-            $queryUsuariosActivos = "SELECT FIRST 10
-                           u.usu_nombre as usuario,
-                           COUNT(*) as actividades
-                       FROM historial_actividades h
-                       INNER JOIN usuario_login2025 u ON h.historial_usuario_id = u.usu_id
-                       WHERE h.historial_fecha >= CURRENT - 30 UNITS DAY
-                       AND h.historial_situacion = 1
-                       GROUP BY u.usu_nombre, u.usu_id
-                       ORDER BY actividades DESC";
-
-            $usuariosActivos = self::fetchArray($queryUsuariosActivos);
-
-            http_response_code(200);
-            echo json_encode([
-                'codigo' => 1,
-                'mensaje' => 'Estadísticas obtenidas exitosamente',
-                'data' => [
-                    'actividades_por_dia' => $actividadesPorDia,
-                    'actividades_por_modulo' => $actividadesPorModulo,
-                    'usuarios_activos' => $usuariosActivos
-                ]
-            ]);
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
-                'codigo' => 0,
-                'mensaje' => 'Error al obtener estadísticas',
-                'detalle' => $e->getMessage()
-            ]);
+            $errorMessage = $e->getMessage();
+            
+            // Manejo específico para errores de fecha
+            if (strpos($errorMessage, '22008') !== false || strpos($errorMessage, '-1264') !== false) {
+                http_response_code(400);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error en formato de fecha',
+                    'detalle' => 'Verifique que la fecha esté en formato YYYY-MM-DD'
+                ]);
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'codigo' => 0,
+                    'mensaje' => 'Error al obtener historial',
+                    'detalle' => $errorMessage
+                ]);
+            }
         }
     }
 
