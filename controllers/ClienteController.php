@@ -25,20 +25,20 @@ class ClienteController extends ActiveRecord
     private static function validarNit($nit)
     {
         $nit = trim($nit);
-        $nd = null;
-        $add = 0;
 
-        if ($nd = preg_match('/^(\d+)-?([\dkK])$/', $nit, $matches)) {
+        if (preg_match('/^(\d+)-?([\dkK])$/', $nit, $matches)) {
             $numero = $matches[1];
             $verificador = strtolower($matches[2]) === 'k' ? 10 : intval($matches[2]);
 
+            $add = 0;
             for ($i = 0; $i < strlen($numero); $i++) {
-                $add += ((strlen($numero) - $i) * intval($numero[$i]));
+                // FÓRMULA CORREGIDA: Equivalente exacta del JavaScript
+                $add += ((($i - strlen($numero)) * -1) + 1) * intval($numero[$i]);
             }
-            
+
             return ((11 - ($add % 11)) % 11) === $verificador;
         }
-        
+
         return false;
     }
 
@@ -52,13 +52,13 @@ class ClienteController extends ActiveRecord
     private static function detectarTipoDocumento($documento)
     {
         $documento = trim($documento);
-        
+
         if (preg_match('/^[\d]+-?[\dkK]$/', $documento)) {
             return ['tipo' => 'NIT', 'valido' => self::validarNit($documento)];
         } elseif (preg_match('/^\d{13}$/', $documento)) {
             return ['tipo' => 'DPI', 'valido' => self::validarDpi($documento)];
         }
-        
+
         return ['tipo' => 'DESCONOCIDO', 'valido' => false];
     }
 
@@ -67,10 +67,10 @@ class ClienteController extends ActiveRecord
     {
         $condicion = $id ? " AND id != " . intval($id) : "";
         $documento = trim($documento);
-        
+
         $query = "SELECT COUNT(*) as total FROM clientes 
                   WHERE nit = '" . $documento . "' AND situacion IN (1,2,3)" . $condicion;
-        
+
         $resultado = self::fetchFirst($query);
         return $resultado['total'] > 0;
     }
@@ -123,12 +123,12 @@ class ClienteController extends ActiveRecord
         $documento = trim($_POST['nit'] ?? '');
         if (!empty($documento)) {
             $validacionDoc = self::detectarTipoDocumento($documento);
-            
+
             if (!$validacionDoc['valido']) {
                 http_response_code(400);
                 echo json_encode([
                     'codigo' => 0,
-                    'mensaje' => 'El documento ingresado no es válido. Use formato NIT (123456-7) o DPI (13 dígitos)'
+                    'mensaje' => 'El documento ingresado no es válido. Use formato NIT (123456-7)'
                 ]);
                 return;
             }
@@ -163,13 +163,25 @@ class ClienteController extends ActiveRecord
             ]);
 
             $crear = $cliente->crear();
-
+            registrarActividad(
+                'CLIENTES',
+                'CREATE',
+                'clientes',
+                null, // Se podría obtener el ID del cliente creado
+                'Cliente creado: ' . $nombre . ' ' . $apellido,
+                null,
+                [
+                    'nombre' => $nombre,
+                    'apellido' => $apellido,
+                    'telefono' => $telefono,
+                    'nit' => $documento
+                ]
+            );
             http_response_code(200);
             echo json_encode([
                 'codigo' => 1,
                 'mensaje' => 'Cliente guardado exitosamente'
             ]);
-
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([
@@ -193,7 +205,7 @@ class ClienteController extends ActiveRecord
             $clientesProcesados = [];
             foreach ($clientes as $cliente) {
                 $tipoDoc = self::detectarTipoDocumento($cliente['nit']);
-                
+
                 $clientesProcesados[] = [
                     'id' => $cliente['id'],
                     'nombre' => $cliente['nombre'],
@@ -235,21 +247,25 @@ class ClienteController extends ActiveRecord
     private static function getEstadoTexto($situacion)
     {
         switch ($situacion) {
-            case 1: return 'Activo';
-            case 2: return 'Inactivo';
-            case 3: return 'Moroso';
-            default: return 'Desconocido';
+            case 1:
+                return 'Activo';
+            case 2:
+                return 'Inactivo';
+            case 3:
+                return 'Moroso';
+            default:
+                return 'Desconocido';
         }
     }
 
     public static function modificarAPI()
     {
-        hasPermissionApi(['ADMIN']); // Solo ADMIN puede modificar
+        hasPermissionApi(['ADMIN']);
         getHeadersApi();
 
         $id = $_POST['id'];
 
-        // MISMAS VALIDACIONES QUE GUARDAR
+        // VALIDACIONES BÁSICAS
         if (empty($_POST['nombre'])) {
             http_response_code(400);
             echo json_encode(['codigo' => 0, 'mensaje' => 'El nombre del cliente es obligatorio']);
@@ -272,14 +288,13 @@ class ClienteController extends ActiveRecord
         $documento = trim($_POST['nit'] ?? '');
         if (!empty($documento)) {
             $validacionDoc = self::detectarTipoDocumento($documento);
-            
+
             if (!$validacionDoc['valido']) {
                 http_response_code(400);
                 echo json_encode(['codigo' => 0, 'mensaje' => 'El documento ingresado no es válido']);
                 return;
             }
 
-            // VERIFICAR DUPLICADOS EXCLUYENDO EL REGISTRO ACTUAL
             if (self::verificarDuplicados($documento, $id)) {
                 http_response_code(400);
                 echo json_encode(['codigo' => 0, 'mensaje' => 'Ya existe otro cliente con este documento']);
@@ -288,23 +303,50 @@ class ClienteController extends ActiveRecord
         }
 
         try {
-            $cliente = Clientes::find($id);
-            $cliente->sincronizar([
+            // 1. OBTENER DATOS ANTERIORES USANDO QUERY DIRECTA
+            $queryDatosAnteriores = "SELECT * FROM clientes WHERE id = " . intval($id);
+            $clienteArray = self::fetchFirst($queryDatosAnteriores);
+
+            $datosAnteriores = [
+                'nombre' => $clienteArray['nombre'],
+                'apellido' => $clienteArray['apellido'],
+                'telefono' => $clienteArray['telefono'],
+                'nit' => $clienteArray['nit'],
+                'correo' => $clienteArray['correo'],
+                'situacion' => $clienteArray['situacion']
+            ];
+
+            // 2. PREPARAR DATOS NUEVOS
+            $datosNuevos = [
                 'nombre' => ucwords(strtolower(trim($_POST['nombre']))),
                 'apellido' => ucwords(strtolower(trim($_POST['apellido']))),
                 'telefono' => $_POST['telefono'],
                 'nit' => $documento,
                 'correo' => $_POST['correo'],
                 'situacion' => $_POST['situacion'] ?? 1
-            ]);
+            ];
 
+            // 3. ACTUALIZAR CLIENTE
+            $cliente = Clientes::find($id);
+            $cliente->sincronizar($datosNuevos);
             $cliente->actualizar();
+
+            // 4. REGISTRAR ACTIVIDAD
+            registrarActividad(
+                'CLIENTES',
+                'UPDATE',
+                'clientes',
+                $id,
+                'Cliente modificado: ' . $datosNuevos['nombre'] . ' ' . $datosNuevos['apellido'],
+                $datosAnteriores,
+                $datosNuevos
+            );
+
             http_response_code(200);
             echo json_encode([
                 'codigo' => 1,
                 'mensaje' => 'Cliente modificado exitosamente'
             ]);
-
         } catch (Exception $e) {
             http_response_code(400);
             echo json_encode([
@@ -323,7 +365,13 @@ class ClienteController extends ActiveRecord
             $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT);
             $update = "UPDATE clientes SET situacion = 0 WHERE id = " . self::$db->quote($id);
             self::SQL($update);
-        
+            registrarActividad(
+                'CLIENTES',
+                'DELETE',
+                'clientes',
+                $id,
+                'Cliente eliminado ID: ' . $id
+            );
             http_response_code(200);
             echo json_encode([
                 'codigo' => 1,
@@ -339,5 +387,3 @@ class ClienteController extends ActiveRecord
         }
     }
 }
-
-?>         

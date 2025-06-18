@@ -12,6 +12,7 @@ use Controllers\ReparacionesController;
 use Controllers\ReportesController;
 use Controllers\UsuariosController;
 use Controllers\ConfiguracionController;
+use Controllers\HistorialController;
 
 $router = new Router();
 $router->setBaseURL('/' . $_ENV['APP_NAME']);
@@ -89,5 +90,11 @@ $router->get('/configuracion', [ConfiguracionController::class, 'renderizarPagin
 $router->get('/configuracion/obtenerConfiguracionAPI', [ConfiguracionController::class, 'obtenerConfiguracionAPI']);
 $router->post('/configuracion/crearRespaldoAPI', [ConfiguracionController::class, 'crearRespaldoAPI']);
 
+// Rutas para Historial de Actividades (Solo ADMIN)
+$router->get('/historial', [HistorialController::class, 'renderizarPagina']);
+$router->get('/historial/buscarHistorialAPI', [HistorialController::class, 'buscarHistorialAPI']);
+$router->get('/historial/estadisticasActividadAPI', [HistorialController::class, 'estadisticasActividadAPI']);
+$router->get('/historial/obtenerUsuariosAPI', [HistorialController::class, 'obtenerUsuariosAPI']);
+$router->get('/historial/obtenerModulosAPI', [HistorialController::class, 'obtenerModulosAPI']);
 // Comprueba y valida las rutas, que existan y les asigna las funciones del Controlador
 $router->comprobarRutas();

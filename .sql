@@ -166,3 +166,35 @@ INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_e
 INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES ('Reparación de Audio', 'Cambio de altavoz o micrófono', 90.00, 1);
 INSERT INTO tipos_servicio (tipo_nombre, tipo_descripcion, precio_base, tiempo_estimado) VALUES  ('Limpieza por Líquidos', 'Limpieza por daño con líquidos', 100.00, 2);-- Tabla de tipos de servicio/reparación
 
+CREATE TABLE historial_actividades (
+    historial_id SERIAL PRIMARY KEY,
+    historial_usuario_id INTEGER NOT NULL,
+    historial_modulo VARCHAR(50) NOT NULL,
+    historial_accion VARCHAR(50) NOT NULL,
+    historial_tabla_afectada VARCHAR(50),
+    historial_registro_id INTEGER,
+    historial_descripcion LVARCHAR(500),
+    historial_datos_anteriores LVARCHAR(1000),
+    historial_datos_nuevos LVARCHAR(1000),
+    historial_ip VARCHAR(45),
+    historial_fecha DATETIME YEAR TO MINUTE DEFAULT CURRENT YEAR TO MINUTE,
+    historial_situacion SMALLINT DEFAULT 1,
+    FOREIGN KEY (historial_usuario_id) REFERENCES usuario_login2025(usu_id)
+);
+
+CREATE TABLE modulos_sistema (
+    modulo_id SERIAL PRIMARY KEY,
+    modulo_nombre VARCHAR(50) NOT NULL,
+    modulo_descripcion VARCHAR(200),
+    modulo_activo SMALLINT DEFAULT 1
+);
+
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('CLIENTES', 'Gestión de clientes del sistema'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('MARCAS', 'Administración de marcas y modelos'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('INVENTARIO', 'Control de inventario de dispositivos'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('VENTAS', 'Proceso de ventas y facturación'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('REPARACIONES', 'Gestión de reparaciones de dispositivos'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('USUARIOS', 'Administración de usuarios del sistema'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('LOGIN', 'Accesos al sistema'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('REPORTES', 'Generación de reportes'),
+INSERT INTO modulos_sistema (modulo_nombre, modulo_descripcion) VALUES ('CONFIGURACION', 'Configuración del sistema');

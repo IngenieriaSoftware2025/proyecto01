@@ -62,15 +62,15 @@ const validarDocumento = () => {
   let tipo = null;
   let mensaje = "";
 
-  // VALIDAR ÚNICAMENTE NIT
-  if (/^[\d]+-?[\dkK]$/.test(documento)) {
-    esValido = validarNit(documento);
-    tipo = "NIT";
-    mensaje = esValido ? "NIT válido" : "NIT inválido - Verifique el formato";
-  } else {
-    esValido = false;
-    mensaje = "Formato no válido. Use formato NIT (123456-7)";
-  }
+  // // VALIDAR ÚNICAMENTE NIT
+  // if (/^[\d]+-?[\dkK]$/.test(documento)) {
+  //   esValido = validarNit(documento);
+  //   tipo = "NIT";
+  //   mensaje = esValido ? "NIT válido" : "NIT inválido - Verifique el formato";
+  // } else {
+  //   esValido = false;
+  //   mensaje = "Formato no válido. Use formato NIT (123456-7)";
+  // }
 
   // Aplicar estilos de validación
   if (esValido) {

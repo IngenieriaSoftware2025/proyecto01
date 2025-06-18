@@ -87,3 +87,22 @@ function getHeadersApi(){
 function asset($ruta){
     return "/". $_ENV['APP_NAME']."/public/" . $ruta;
 }
+
+// Función para registrar actividades del usuario
+function registrarActividad($modulo, $accion, $tablaAfectada = null, $registroId = null, $descripcion = '', $datosAnteriores = null, $datosNuevos = null) {
+    if (!isset($_SESSION['user_id'])) {
+        return false;
+    }
+    
+    require_once __DIR__ . '/../controllers/HistorialController.php';
+    return Controllers\HistorialController::registrarActividad(
+        $_SESSION['user_id'],
+        $modulo,
+        $accion,
+        $tablaAfectada,
+        $registroId,
+        $descripcion,
+        $datosAnteriores,
+        $datosNuevos
+    );
+}

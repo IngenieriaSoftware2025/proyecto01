@@ -75,6 +75,15 @@ class AppController extends ActiveRecord
                         $_SESSION['rol_id'] = 2;
                     }
 
+                    // Registrar actividad de login exitoso
+                    registrarActividad(
+                        'LOGIN',
+                        'LOGIN',
+                        null,
+                        null,
+                        'Usuario logueado exitosamente: ' . $nombreUser . ' (' . $usuario . ')'
+                    );
+
                     http_response_code(200);
                     echo json_encode([
                         'codigo' => 1,
@@ -151,6 +160,18 @@ class AppController extends ActiveRecord
     public static function logout()
     {
         session_start();
+        
+        // Registrar actividad de logout
+        if (isset($_SESSION['user'])) {
+            registrarActividad(
+                'LOGIN',
+                'LOGOUT',
+                null,
+                null,
+                'Usuario cerró sesión: ' . $_SESSION['user']
+            );
+        }
+        
         session_destroy();
 
         if (isset($_COOKIE[session_name()])) {

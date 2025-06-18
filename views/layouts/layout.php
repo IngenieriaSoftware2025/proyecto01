@@ -296,6 +296,11 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a class="dropdown-item" href="/proyecto01/historial">
+                                            <i class="bi bi-clock-history me-2"></i>Historial de Actividades
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item" href="/proyecto01/reportes">
                                             <i class="bi bi-file-text me-2"></i>Reportes
                                         </a>
